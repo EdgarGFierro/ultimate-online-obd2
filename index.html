@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Honda Civic 2008 R18 • HDS Pro v3</title>
+  <style>
+    :root {
+      --bg: #0b1120; --surface: #151f32; --surface-2: #1e293b; --border: #2e3c54;
+      --text: #f8fafc; --muted: #94a3b8; --blue: #2563eb; --cyan: #0ea5e9;
+      --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); margin: 0; padding: 12px 12px 34px;
+    }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .title { font-size: 1.05rem; font-weight: 800; color: #38bdf8; letter-spacing: 0.02em; }
+    .subtitle { font-size: 0.72rem; color: var(--muted); }
+    .pill {
+      font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 999px;
+      background: var(--surface-2); border: 1px solid var(--border); color: var(--muted);
+    }
+    .pill.ok { background: rgba(16,185,129,0.15); border-color: var(--green); color: #34d399; }
+    .pill.rec { background: rgba(239,68,68,0.2); border-color: var(--red); color: #fca5a5; animation: pulse 1.4s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    button {
+      border: none; border-radius: 10px; padding: 12px 10px; font-weight: 700;
+      font-size: 0.86rem; color: #fff; cursor: pointer; transition: transform 0.08s, opacity 0.15s;
+    }
+    button:active:not(:disabled) { transform: scale(0.98); }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+    #btnConnect { background: var(--blue); }
+    #btnRecord { background: var(--green); }
+    #btnDisconnectSave { background: var(--red); grid-column: span 2; }
+    .sub-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+    .btn-sec { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-size: 0.74rem; padding: 8px 6px; }
+
+    /* Selectores independientes + Clima exterior */
+    .toggles-panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 10px; margin-bottom: 10px; display: grid; gap: 9px;
+    }
+    .toggle-group { display: grid; grid-template-columns: 82px 1fr; align-items: center; gap: 8px; }
+    .toggle-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg); padding: 3px; border-radius: 9px; border: 1px solid var(--border); gap: 4px; }
+    .seg button {
+      background: transparent; color: var(--muted); padding: 8px 6px; font-size: 0.82rem;
+      border-radius: 7px; font-weight: 700;
+    }
+    .seg button.active-blue { background: var(--blue); color: #fff; }
+    .seg button.active-cyan { background: var(--cyan); color: #fff; }
+    .seg button.active-amber { background: var(--amber); color: #111827; }
+    .seg button.active-green { background: var(--green); color: #fff; }
+
+    .env-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .note-input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+      border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; outline: none;
+    }
+    .note-input:focus { border-color: var(--cyan); }
+
+    .status-bar {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 9px 11px; font-size: 0.77rem; line-height: 1.45; margin-bottom: 10px;
+    }
+    .alert-strip {
+      display: none; border-radius: 9px; padding: 8px 10px; font-size: 0.77rem; font-weight: 600;
+      margin-bottom: 10px; background: rgba(245,158,11,0.14); border: 1px solid var(--amber); color: #fcd34d;
+    }
+
+    .ecu-meta {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;
+      font-size: 0.72rem;
+    }
+    .ecu-meta div span { color: var(--muted); display: block; font-size: 0.65rem; text-transform: uppercase; }
+    .ecu-meta div b { color: var(--text); word-break: break-all; }
+
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 9px 10px;
+    }
+    .card.warn { border-color: var(--amber); }
+    .card.danger { border-color: var(--red); }
+    .label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.02em; }
+    .val { font-size: 1.22rem; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .unit { font-size: 0.7rem; color: var(--muted); font-weight: 500; }
+    .subval { font-size: 0.69rem; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+    details {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 10px; font-size: 0.73rem;
+    }
+    summary { cursor: pointer; font-weight: 700; color: var(--muted); }
+    #debugLog {
+      margin-top: 8px; max-height: 150px; overflow-y: auto; font-family: ui-monospace, Menlo, monospace;
+      font-size: 0.67rem; color: #93c5fd; white-space: pre-wrap; word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <div class="title">HONDA CIVIC 2008 • HDS PRO v3</div>
+      <div class="subtitle">R18A1 1.8L + Caja 5AT + GPS + Clima • 57 variables/fila</div>
+    </div>
+    <div id="connPill" class="pill">DESCONECTADO</div>
+  </div>
+
+  <div class="actions">
+    <button id="btnConnect">1. Conectar ELM327</button>
+    <button id="btnRecord" disabled>2. Iniciar Grabación</button>
+    <button id="btnDisconnectSave" disabled>3. Desconectar y Guardar CSV (0)</button>
+  </div>
+
+  <div class="sub-actions">
+    <button id="btnWeather" class="btn-sec" type="button">Clima GPS</button>
+    <button id="btnShareLast" class="btn-sec" disabled>Compartir CSV</button>
+    <button id="btnWakeStatus" class="btn-sec" disabled>Pantalla: Normal</button>
+  </div>
+
+  <div class="toggles-panel">
+    <div class="toggle-group">
+      <div class="toggle-label">Aire A/C</div>
+      <div class="seg">
+        <button id="btnAcOff" class="active-green" type="button">Sin A/C (OFF)</button>
+        <button id="btnAcOn" type="button">Con A/C (ON)</button>
+      </div>
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-label">Manejo</div>
+      <div class="seg">
+        <button id="btnIdle" class="active-blue" type="button">Ralentí</button>
+        <button id="btnDrive" type="button">Movimiento</button>
+      </div>
+    </div>
+    <div class="env-row">
+      <input id="extTempInput" class="note-input" type="number" step="0.5" placeholder="Temp. Ext °C (manual o GPS)" />
+      <input id="extHumInput" class="note-input" type="number" step="1" placeholder="Humedad % (opcional)" />
+    </div>
+    <input id="sessionNote" class="note-input" type="text" placeholder="Nota opcional (ej: EVAP tapada, bujías nuevas, clima caluroso...)" />
+  </div>
+
+  <div class="status-bar" id="statusBar">
+    Abre en <b>Bluefy</b> (iOS) o <b>Chrome</b> (PC/Android). Pulsa <b>Clima GPS</b> antes de salir para registrar temperatura exterior y humedad reales.
+  </div>
+
+  <div class="alert-strip" id="alertStrip"></div>
+
+  <div class="ecu-meta">
+    <div><span>Protocolo / Modo</span><b id="m_proto">--</b></div>
+    <div><span>VIN Detectado</span><b id="m_vin">--</b></div>
+    <div><span>DTC Confirmados (M03)</span><b id="m_dtc">--</b></div>
+    <div><span>DTC Pendientes (M07)</span><b id="m_pdtc">--</b></div>
+    <div><span>Monitores Emisiones</span><b id="m_readiness">--</b></div>
+    <div><span>Bucle / Distancia</span><b id="m_dist">--</b></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="label">Revoluciones / Vel</div>
+      <div class="val"><span id="v_rpm">--</span> <span class="unit">rpm</span></div>
+      <div class="subval">OBD: <span id="v_spd">--</span> • GPS: <span id="v_gps_spd">--</span> km/h</div>
+    </div>
+    <div class="card" id="card_trim">
+      <div class="label">Ajuste Total Comb.</div>
+      <div class="val"><span id="v_trim">--</span> <span class="unit">%</span></div>
+      <div class="subval">STFT: <span id="v_stft">--</span>% • LTFT: <span id="v_ltft">--</span>%</div>
+    </div>
+    <div class="card" id="card_trans">
+      <div class="label">Transmisión 5AT Est.</div>
+      <div class="val"><span id="v_gear">--</span> <span class="unit">marcha</span></div>
+      <div class="subval">Slip Conv: <span id="v_slip">--</span>% • Acel: <span id="v_acel">--</span> m/s²</div>
+    </div>
+    <div class="card">
+      <div class="label">MAP / Vacío Múltiple</div>
+      <div class="val"><span id="v_map">--</span> <span class="unit">kPa</span></div>
+      <div class="subval">Vacío: <span id="v_vac">--</span> inHg • Baro: <span id="v_baro">--</span></div>
+    </div>
+    <div class="card">
+      <div class="label">MAF / Eficiencia Vol.</div>
+      <div class="val"><span id="v_maf">--</span> <span class="unit">g/s</span></div>
+      <div class="subval">VE R18: <span id="v_ve">--</span>% • Carga: <span id="v_load">--</span>%</div>
+    </div>
+    <div class="card">
+      <div class="label">Sensor O2 1 (Banda Ancha)</div>
+      <div class="val"><span id="v_afr1">--</span> <span class="unit">AFR</span></div>
+      <div class="subval">Cmd: <span id="v_cmdafr">--</span> • Corr: <span id="v_o2ma">--</span> mA</div>
+    </div>
+    <div class="card" id="card_o2s2">
+      <div class="label">Sensor O2 2 (Post-Cat)</div>
+      <div class="val"><span id="v_o2s2">--</span> <span class="unit">V</span></div>
+      <div class="subval">STFT S2: <span id="v_o2s2t">--</span>% • Cat: <span id="v_cat">--</span>°C</div>
+    </div>
+    <div class="card">
+      <div class="label">Térmica ECT / IAT</div>
+      <div class="val"><span id="v_ect">--</span> <span class="unit">°C</span></div>
+      <div class="subval">IAT: <span id="v_iat">--</span>°C • ΔExt: <span id="v_delta_iat">--</span>°C</div>
+    </div>
+    <div class="card">
+      <div class="label">Consumo / Pendiente</div>
+      <div class="val"><span id="v_lh">--</span> <span class="unit">L/h</span></div>
+      <div class="subval"><span id="v_kml">--</span> km/L • Pend: <span id="v_slope">--</span>%</div>
+    </div>
+    <div class="card">
+      <div class="label">EVAP / Avance / ECU</div>
+      <div class="val"><span id="v_evap">--</span> <span class="unit">% EVAP</span></div>
+      <div class="subval">Av: <span id="v_ign">--</span>° • ECU: <span id="v_ecu">--</span>V • Gas: <span id="v_fuel">--</span>%</div>
+    </div>
+    <div class="card">
+      <div class="label">Mariposa / EGR</div>
+      <div class="val"><span id="v_cvr">--</span> <span class="unit">% CVR</span></div>
+      <div class="subval">TPS: <span id="v_tps">--</span>% • EGR: <span id="v_egr">--</span>%</div>
+    </div>
+    <div class="card">
+      <div class="label">EVAP Vapor / Rel TPS</div>
+      <div class="val"><span id="v_evapp">--</span> <span class="unit">Pa</span></div>
+      <div class="subval">Rel: <span id="v_rtps">--</span>% • Bucle: <span id="m_loop">--</span></div>
+    </div>
+  </div>
+
+  <details>
+    <summary>Consola Técnica ELM327 (diagnóstico de conexión)</summary>
+    <div id="debugLog">Esperando conexión...</div>
+  </details>
+
+  <script>
+    // =========================================================================
+    // HONDA CIVIC 2008 R18A1 + SPCA 5AT - PRO TELEMETRY LOGGER v3
+    // =========================================================================
+    const BLE_SERVICES = [
+      0xFFF0, 0xFFE0, 0x18F0,
+      '0000fff0-0000-1000-8000-00805f9b34fb',
+      '0000ffe0-0000-1000-8000-00805f9b34fb',
+      '000018f0-0000-1000-8000-00805f9b34fb',
+      '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
+      'e7810a71-73ae-499d-8c15-faa9aef0c3f2'
+    ];
+    const BACKUP_KEY = 'honda_civic_2008_hds_backup_v3';
+    const R18_DISPLACEMENT_L = 1.799;
+
+    // Relaciones teóricas RPM/(km/h) con convertidor bloqueado para Civic 2008 1.8L 5AT (SPCA + 205/55R16)
+    const HONDA_5AT_RATIOS = [
+      { gear: '1a', ratio: 99.31 },
+      { gear: '2a', ratio: 57.14 },
+      { gear: '3a', ratio: 38.07 },
+      { gear: '4a', ratio: 26.86 },
+      { gear: '5a', ratio: 19.56 }
+    ];
+
+    let bleDevice = null, rxChar = null, txChar = null;
+    let rxBuffer = '', resolvePrompt = null;
+    let isConnected = false, isRecording = false, useMultiPid = false;
+    let isCanProtocol = true;
+    let supportedPids = new Set();
+    let fastPidList = [], slowPidList = [];
+    let records = [];
+    let lastCsvText = '', lastCsvName = '';
+    let wakeLockObj = null, keepAliveAudioCtx = null;
+
+    // Estado de GPS y Clima
+    let gpsWatchId = null;
+    const gpsState = {
+      speedKmh: '', altM: '', lat: '', lon: '', slopePct: '',
+      prevAltM: null, prevLat: null, prevLon: null
+    };
+    const envState = { extTempC: '', extHumPct: '', extPressHpa: '', source: 'Sin_dato' };
+
+    // Estado previo para calcular aceleración longitudinal
+    let prevSpdKmh = null, prevTimeSec = null;
+
+    // Selectores independientes
+    let acState = 'Sin_AC';
+    let driveMode = 'Ralenti';
+
+    // Metadatos ECU
+    const ecuInfo = {
+      elmVer: '--', proto: '--', vin: 'No_disponible',
+      dtcStored: 'Ninguno', dtcPending: 'Ninguno',
+      milOn: 'NO', dtcCount: 0, readiness: '--',
+      warmups: '', distCleared: '', distMil: ''
+    };
+
+    // Sensores vivos
+    const live = {
+      fuel_sys: '', load_pct: '', ect_c: '', stft_pct: '', ltft_pct: '',
+      map_kpa: '', rpm: '', spd_kmh: '', ign_deg: '', iat_c: '', maf_gs: '',
+      tps_abs_pct: '', o2s2_v: '', o2s2_stft_pct: '', runtime_s: '',
+      egr_cmd_pct: '', egr_err_pct: '', evap_purge_pct: '', fuel_level_pct: '',
+      evap_vapor_pa: '', baro_kpa: '', o2s1_lambda: '', o2s1_afr: '', o2s1_ma: '',
+      cat_temp_c: '', ecu_v: '', abs_load_pct: '', cmd_lambda: '', cmd_afr: '',
+      tps_rel_pct: '', amb_obd_c: '', tps_b_pct: '', pedal_d_pct: '', pedal_e_pct: '', cvr_pct: ''
+    };
+
+    const el = (id) => document.getElementById(id);
+    const btnConnect = el('btnConnect');
+    const btnRecord = el('btnRecord');
+    const btnDisconnectSave = el('btnDisconnectSave');
+    const btnShareLast = el('btnShareLast');
+    const btnWakeStatus = el('btnWakeStatus');
+    const btnWeather = el('btnWeather');
+    const connPill = el('connPill');
+    const statusBar = el('statusBar');
+    const alertStrip = el('alertStrip');
+    const debugLog = el('debugLog');
+
+    function logDebug(msg) {
+      const t = new Date().toTimeString().slice(0, 8);
+      debugLog.textContent = `[${t}] ${msg}\n` + debugLog.textContent.slice(0, 4000);
+    }
+    function setStatus(html) { statusBar.innerHTML = html; }
+
+    // Selectores A/C y Manejo
+    el('btnAcOff').onclick = () => { acState = 'Sin_AC'; el('btnAcOff').className = 'active-green'; el('btnAcOn').className = ''; };
+    el('btnAcOn').onclick = () => { acState = 'Con_AC'; el('btnAcOff').className = ''; el('btnAcOn').className = 'active-cyan'; };
+    el('btnIdle').onclick = () => { driveMode = 'Ralenti'; el('btnIdle').className = 'active-blue'; el('btnDrive').className = ''; };
+    el('btnDrive').onclick = () => { driveMode = 'Movimiento'; el('btnIdle').className = ''; el('btnDrive').className = 'active-amber'; };
+
+    // Entradas manuales de clima
+    el('extTempInput').addEventListener('input', () => {
+      envState.extTempC = el('extTempInput').value;
+      envState.source = 'Manual';
+    });
+    el('extHumInput').addEventListener('input', () => {
+      envState.extHumPct = el('extHumInput').value;
+    });
+
+    // Recuperar respaldo previo
+    (function checkBackup() {
+      try {
+        const raw = localStorage.getItem(BACKUP_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            lastCsvText = buildCSV(parsed);
+            lastCsvName = `civic_2008_respaldo_${parsed.length}filas.csv`;
+            btnShareLast.disabled = false;
+            btnShareLast.textContent = `Respaldo (${parsed.length})`;
+          }
+        }
+      } catch (e) {}
+    })();
+
+    // =========================================================================
+    // CLIMA EXTERIOR AUTOMÁTICO (Open-Meteo sin API Key) + GPS EN VIVO
+    // =========================================================================
+    function haversineMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371000;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+      return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function startGpsWatch() {
+      if (!('geolocation' in navigator) || gpsWatchId !== null) return;
+      try {
+        gpsWatchId = navigator.geolocation.watchPosition((pos) => {
+          const c = pos.coords;
+          gpsState.lat = c.latitude;
+          gpsState.lon = c.longitude;
+          if (c.speed !== null && !Number.isNaN(c.speed)) {
+            gpsState.speedKmh = Math.max(0, c.speed * 3.6);
+          }
+          if (c.altitude !== null && !Number.isNaN(c.altitude)) {
+            gpsState.altM = c.altitude;
+            if (gpsState.prevLat !== null && gpsState.prevAltM !== null) {
+              const distM = haversineMeters(gpsState.prevLat, gpsState.prevLon, c.latitude, c.longitude);
+              if (distM >= 15) {
+                const rawSlope = ((c.altitude - gpsState.prevAltM) / distM) * 100;
+                if (Math.abs(rawSlope) <= 25) gpsState.slopePct = rawSlope;
+                gpsState.prevAltM = c.altitude;
+                gpsState.prevLat = c.latitude;
+                gpsState.prevLon = c.longitude;
+              }
+            } else {
+              gpsState.prevAltM = c.altitude;
+              gpsState.prevLat = c.latitude;
+              gpsState.prevLon = c.longitude;
+            }
+          }
+        }, (err) => {
+          logDebug('GPS aviso: ' + err.message);
+        }, { enableHighAccuracy: true, maximumAge: 1500, timeout: 5000 });
+      } catch (e) {}
+    }
+
+    function stopGpsWatch() {
+      if (gpsWatchId !== null && 'geolocation' in navigator) {
+        navigator.geolocation.clearWatch(gpsWatchId);
+        gpsWatchId = null;
+      }
+    }
+
+    btnWeather.onclick = async () => {
+      if (!('geolocation' in navigator)) {
+        setStatus('Tu navegador no permite GPS; ingresa la temperatura exterior manualmente.');
+        return;
+      }
+      btnWeather.textContent = 'Buscando...';
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude.toFixed(4)}&longitude=${longitude.toFixed(4)}&current=temperature_2m,relative_humidity_2m,surface_pressure`;
+          const resp = await fetch(url);
+          const data = await resp.json();
+          if (data && data.current) {
+            envState.extTempC = data.current.temperature_2m;
+            envState.extHumPct = data.current.relative_humidity_2m;
+            envState.extPressHpa = data.current.surface_pressure;
+            envState.source = 'OpenMeteo_GPS';
+            el('extTempInput').value = envState.extTempC;
+            el('extHumInput').value = envState.extHumPct;
+            btnWeather.textContent = `${envState.extTempC}°C / ${envState.extHumPct}%`;
+            setStatus(`<b>Clima cargado:</b> ${envState.extTempC} °C, humedad ${envState.extHumPct}%, presión ${envState.extPressHpa} hPa. Ya puedes desconectar datos si gustas.`);
+            logDebug(`Clima GPS: ${envState.extTempC}C, ${envState.extHumPct}%, ${envState.extPressHpa}hPa`);
+          }
+        } catch (e) {
+          btnWeather.textContent = 'Sin Red';
+          setStatus('No hubo internet para descargar clima; escribe la temperatura exterior manualmente.');
+        }
+      }, (err) => {
+        btnWeather.textContent = 'GPS Negado';
+        setStatus('Permiso de GPS denegado; escribe la temperatura exterior manualmente.');
+      }, { enableHighAccuracy: true, timeout: 8000 });
+    };
+
+    // =========================================================================
+    // WAKE LOCK (Pantalla encendida durante grabación)
+    // =========================================================================
+    async function enableWakeLock() {
+      let method = 'Sistema';
+      if ('wakeLock' in navigator) {
+        try {
+          wakeLockObj = await navigator.wakeLock.request('screen');
+          wakeLockObj.addEventListener('release', () => { btnWakeStatus.textContent = 'Pantalla: Libre'; });
+          method = 'WakeLock';
+        } catch (e) {}
+      }
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx && !keepAliveAudioCtx) {
+          keepAliveAudioCtx = new AudioCtx();
+          const osc = keepAliveAudioCtx.createOscillator();
+          const gain = keepAliveAudioCtx.createGain();
+          gain.gain.value = 0.0001;
+          osc.connect(gain);
+          gain.connect(keepAliveAudioCtx.destination);
+          osc.start();
+          if (method === 'Sistema') method = 'KeepAlive';
+        }
+      } catch (e) {}
+      btnWakeStatus.textContent = `Pantalla: ${method}`;
+    }
+
+    async function disableWakeLock() {
+      try { if (wakeLockObj) { await wakeLockObj.release(); wakeLockObj = null; } } catch (e) {}
+      try { if (keepAliveAudioCtx) { await keepAliveAudioCtx.close(); keepAliveAudioCtx = null; } } catch (e) {}
+      btnWakeStatus.textContent = 'Pantalla: Normal';
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && isRecording) enableWakeLock();
+    });
+
+    // =========================================================================
+    // COMUNICACIÓN BLE + REENSAMBLADO ISO-TP CAN
+    // =========================================================================
+    function onNotify(event) {
+      rxBuffer += new TextDecoder().decode(event.target.value);
+      if (rxBuffer.includes('>') && resolvePrompt) {
+        const out = rxBuffer;
+        rxBuffer = '';
+        const fn = resolvePrompt;
+        resolvePrompt = null;
+        fn(out);
+      }
+    }
+
+    function sendCmd(cmd, timeoutMs = 1300) {
+      return new Promise(async (resolve) => {
+        if (!txChar) return resolve('');
+        rxBuffer = '';
+        const timer = setTimeout(() => { resolvePrompt = null; resolve(rxBuffer); }, timeoutMs);
+        resolvePrompt = (data) => { clearTimeout(timer); resolve(data); };
+        const bytes = new TextEncoder().encode(cmd + '\r');
+        try {
+          await txChar.writeValueWithoutResponse(bytes);
+        } catch (e) {
+          await txChar.writeValue(bytes).catch(() => {});
+        }
+      });
+    }
+
+    function reassemblePayload(raw, modeReply = '41') {
+      if (!raw) return '';
+      const lines = raw.split(/[\r\n]+/).map(l => l.trim()).filter(Boolean);
+      const clean = [];
+      for (const ln of lines) {
+        const up = ln.toUpperCase().replace(/>/g, '').trim();
+        if (!up || /SEARCHING|NO DATA|STOPPED|ERROR|UNABLE|OK|\?/.test(up)) continue;
+        clean.push(up);
+      }
+      const frames = [];
+      for (const ln of clean) {
+        const m = ln.match(/^([0-9A-F]):\s*([0-9A-F\s]+)$/);
+        if (m) {
+          const idx = parseInt(m[1], 16);
+          const hex = m[2].replace(/\s+/g, '');
+          if (idx === 0 && frames.length > 0) break;
+          frames.push(hex);
+        }
+      }
+      if (frames.length > 0) {
+        const joined = frames.join('');
+        const pos = joined.indexOf(modeReply);
+        return pos !== -1 ? joined.slice(pos + modeReply.length) : '';
+      }
+      for (const ln of clean) {
+        const hex = ln.replace(/[^0-9A-F]/g, '');
+        if (hex.startsWith(modeReply)) return hex.slice(modeReply.length);
+      }
+      return '';
+    }
+
+    // =========================================================================
+    // DECODIFICADORES OBD-II + MONITORES + TRANSMISIÓN 5AT
+    // =========================================================================
+    const FUEL_SYS_MAP = {
+      1: 'OpenLoop_Frio', 2: 'ClosedLoop_OK', 4: 'OpenLoop_Carga',
+      8: 'OpenLoop_Falla', 16: 'ClosedLoop_FallaO2'
+    };
+
+    function decodeReadiness(b, c, d) {
+      const inc = [];
+      if ((b & 0x01) && (b & 0x10)) inc.push('Misfire');
+      if ((b & 0x02) && (b & 0x20)) inc.push('Fuel');
+      if ((b & 0x04) && (b & 0x40)) inc.push('Comp');
+      const sparkMap = [[0,'Cat'],[2,'EVAP'],[5,'O2'],[6,'O2Heat'],[7,'EGR']];
+      for (const [bit, name] of sparkMap) {
+        if ((c & (1 << bit)) && (d & (1 << bit))) inc.push(name);
+      }
+      return inc.length ? 'Pend:' + inc.join('|') : 'Todos_OK';
+    }
+
+    function parseBitmask(hex8, baseOffset) {
+      if (hex8.length < 8) return;
+      const val = parseInt(hex8.slice(0, 8), 16) >>> 0;
+      for (let bit = 0; bit < 32; bit++) {
+        if (val & (1 << (31 - bit))) {
+          supportedPids.add((baseOffset + bit + 1).toString(16).toUpperCase().padStart(2, '0'));
+        }
+      }
+    }
+
+    function parseMode01Payload(stream, expectedSinglePid = null) {
+      if (!stream) return {};
+      const out = {};
+      let i = 0;
+      const u8 = () => { const v = parseInt(stream.slice(i, i + 2), 16); i += 2; return v; };
+      const u16 = () => { const v = parseInt(stream.slice(i, i + 4), 16); i += 4; return v; };
+      const s16 = () => { const v = u16(); return v >= 32768 ? v - 65536 : v; };
+
+      while (i + 2 <= stream.length) {
+        const pid = stream.slice(i, i + 2);
+        if (expectedSinglePid && i === 0 && pid !== expectedSinglePid) break;
+        i += 2;
+
+        if (pid === '01' && i + 8 <= stream.length) {
+          const a = u8(), b = u8(), c = u8(), d = u8();
+          ecuInfo.milOn = (a & 0x80) ? 'SI' : 'NO';
+          ecuInfo.dtcCount = a & 0x7F;
+          ecuInfo.readiness = decodeReadiness(b, c, d);
+        }
+        else if (pid === '03' && i + 4 <= stream.length) { const a = u8(); u8(); out.fuel_sys = FUEL_SYS_MAP[a] || `Est_${a}`; }
+        else if (pid === '04' && i + 2 <= stream.length) out.load_pct = (u8() * 100) / 255;
+        else if (pid === '05' && i + 2 <= stream.length) out.ect_c = u8() - 40;
+        else if (pid === '06' && i + 2 <= stream.length) out.stft_pct = ((u8() - 128) * 100) / 128;
+        else if (pid === '07' && i + 2 <= stream.length) out.ltft_pct = ((u8() - 128) * 100) / 128;
+        else if (pid === '0B' && i + 2 <= stream.length) out.map_kpa = u8();
+        else if (pid === '0C' && i + 4 <= stream.length) out.rpm = u16() / 4;
+        else if (pid === '0D' && i + 2 <= stream.length) out.spd_kmh = u8();
+        else if (pid === '0E' && i + 2 <= stream.length) out.ign_deg = (u8() / 2) - 64;
+        else if (pid === '0F' && i + 2 <= stream.length) out.iat_c = u8() - 40;
+        else if (pid === '10' && i + 4 <= stream.length) out.maf_gs = u16() / 100;
+        else if (pid === '11' && i + 2 <= stream.length) out.tps_abs_pct = (u8() * 100) / 255;
+        else if (pid === '15' && i + 4 <= stream.length) {
+          out.o2s2_v = u8() / 200;
+          const b = u8();
+          out.o2s2_stft_pct = b === 255 ? '' : ((b - 128) * 100) / 128;
+        }
+        else if (pid === '1F' && i + 4 <= stream.length) out.runtime_s = u16();
+        else if (pid === '21' && i + 4 <= stream.length) ecuInfo.distMil = u16();
+        else if (pid === '2C' && i + 2 <= stream.length) out.egr_cmd_pct = (u8() * 100) / 255;
+        else if (pid === '2D' && i + 2 <= stream.length) out.egr_err_pct = ((u8() - 128) * 100) / 128;
+        else if (pid === '2E' && i + 2 <= stream.length) out.evap_purge_pct = (u8() * 100) / 255;
+        else if (pid === '2F' && i + 2 <= stream.length) out.fuel_level_pct = (u8() * 100) / 255;
+        else if (pid === '30' && i + 2 <= stream.length) ecuInfo.warmups = u8();
+        else if (pid === '31' && i + 4 <= stream.length) ecuInfo.distCleared = u16();
+        else if (pid === '32' && i + 4 <= stream.length) out.evap_vapor_pa = s16() / 4;
+        else if (pid === '33' && i + 2 <= stream.length) out.baro_kpa = u8();
+        else if (pid === '34' && i + 8 <= stream.length) {
+          const lam = u16() / 32768;
+          const ma = (u16() / 256) - 128;
+          out.o2s1_lambda = lam;
+          out.o2s1_afr = lam * 14.7;
+          out.o2s1_ma = ma;
+        }
+        else if (pid === '3C' && i + 4 <= stream.length) out.cat_temp_c = (u16() / 10) - 40;
+        else if (pid === '42' && i + 4 <= stream.length) out.ecu_v = u16() / 1000;
+        else if (pid === '43' && i + 4 <= stream.length) out.abs_load_pct = (u16() * 100) / 255;
+        else if (pid === '44' && i + 4 <= stream.length) {
+          const lam = u16() / 32768;
+          out.cmd_lambda = lam;
+          out.cmd_afr = lam * 14.7;
+        }
+        else if (pid === '45' && i + 2 <= stream.length) out.tps_rel_pct = (u8() * 100) / 255;
+        else if (pid === '46' && i + 2 <= stream.length) out.amb_obd_c = u8() - 40;
+        else if (pid === '47' && i + 2 <= stream.length) out.tps_b_pct = (u8() * 100) / 255;
+        else if (pid === '49' && i + 2 <= stream.length) out.pedal_d_pct = (u8() * 100) / 255;
+        else if (pid === '4A' && i + 2 <= stream.length) out.pedal_e_pct = (u8() * 100) / 255;
+        else if (pid === '4C' && i + 2 <= stream.length) out.cvr_pct = (u8() * 100) / 255;
+        else break;
+      }
+      return out;
+    }
+
+    function estimateHonda5AT(rpm, spd) {
+      if (Number.isNaN(rpm) || Number.isNaN(spd) || spd < 5 || rpm < 500) {
+        return { gear: 'N/P', ratio: '', slipPct: '' };
+      }
+      const actual = rpm / spd;
+      let best = HONDA_5AT_RATIOS[0], bestDist = 1e9;
+      for (const g of HONDA_5AT_RATIOS) {
+        let dist = Math.abs(Math.log(actual / g.ratio));
+        if (actual < g.ratio * 0.93) dist += 0.35;
+        if (dist < bestDist) { bestDist = dist; best = g; }
+      }
+      const slipPct = ((actual - best.ratio) / best.ratio) * 100.0;
+      return { gear: best.gear, ratio: actual, slipPct };
+    }
+
+    function decodeDTCs(raw, modeReply) {
+      const payload = reassemblePayload(raw, modeReply);
+      if (!payload) return 'Ninguno';
+      let hex = payload;
+      if (isCanProtocol && hex.length >= 2) {
+        const count = parseInt(hex.slice(0, 2), 16);
+        if (count === 0) return 'Ninguno';
+        hex = hex.length >= 2 + count * 4 ? hex.slice(2, 2 + count * 4) : hex.slice(2);
+      }
+      const pfx = ['P0','P1','P2','P3','C0','C1','C2','C3','B0','B1','B2','B3','U0','U1','U2','U3'];
+      const codes = [];
+      for (let i = 0; i + 4 <= hex.length; i += 4) {
+        const chunk = hex.slice(i, i + 4);
+        if (chunk === '0000') continue;
+        codes.push(pfx[parseInt(chunk[0], 16)] + chunk.slice(1));
+      }
+      return codes.length ? [...new Set(codes)].join('|') : 'Ninguno';
+    }
+
+    function decodeVIN(raw) {
+      const payload = reassemblePayload(raw, '4902');
+      if (!payload || payload.length < 34) return 'No_disponible';
+      const hex = payload.startsWith('01') ? payload.slice(2) : payload;
+      let vin = '';
+      for (let i = 0; i + 2 <= hex.length; i += 2) {
+        const code = parseInt(hex.slice(i, i + 2), 16);
+        if (code >= 48 && code <= 90) vin += String.fromCharCode(code);
+      }
+      return vin.length >= 11 ? vin.slice(0, 17) : 'No_disponible';
+    }
+
+    // =========================================================================
+    // CONEXIÓN HONDA CAN 29-BIT
+    // =========================================================================
+    btnConnect.onclick = async () => {
+      try {
+        setStatus('Buscando adaptador <b>ELM327 BLE</b>...');
+        bleDevice = await navigator.bluetooth.requestDevice({
+          acceptAllDevices: true,
+          optionalServices: BLE_SERVICES
+        });
+
+        bleDevice.addEventListener('gattserverdisconnected', () => {
+          isConnected = false; isRecording = false;
+          disableWakeLock(); stopGpsWatch();
+          connPill.textContent = 'DESCONECTADO'; connPill.className = 'pill';
+          btnConnect.disabled = false; btnRecord.disabled = true;
+          logDebug('Bluetooth desconectado.');
+        });
+
+        const server = await bleDevice.gatt.connect();
+        let service = null;
+        for (const uuid of BLE_SERVICES) {
+          try { service = await server.getPrimaryService(uuid); break; } catch (e) {}
+        }
+        if (!service) throw new Error('Servicio BLE del ELM327 no encontrado.');
+
+        const chars = await service.getCharacteristics();
+        rxChar = null; txChar = null;
+        for (const c of chars) {
+          if (c.properties.notify || c.properties.indicate) rxChar = c;
+          if (c.properties.write || c.properties.writeWithoutResponse) txChar = c;
+        }
+        if (!rxChar || !txChar) throw new Error('Características RX/TX no encontradas.');
+
+        await rxChar.startNotifications();
+        rxChar.addEventListener('characteristicvaluechanged', onNotify);
+
+        setStatus('Inicializando ECU <b>Honda Civic CAN 29-bit</b>...');
+        const ver = await sendCmd('ATZ', 2000);
+        ecuInfo.elmVer = ver.replace(/[\r\n>]/g, ' ').trim().slice(0, 24) || 'ELM327';
+        logDebug('ATZ: ' + ecuInfo.elmVer);
+
+        await sendCmd('ATE0');
+        await sendCmd('ATL0');
+        await sendCmd('ATS0');
+        await sendCmd('ATH0');
+        await sendCmd('ATAT1');
+
+        await sendCmd('ATSP7');
+        let p00 = await sendCmd('0100', 2200);
+        let pay00 = reassemblePayload(p00, '4100');
+        if (!pay00) {
+          logDebug('ATSP7 sin respuesta -> cambiando a ATSP0...');
+          await sendCmd('ATSP0');
+          p00 = await sendCmd('0100', 3000);
+          pay00 = reassemblePayload(p00, '4100');
+        }
+        if (!pay00) throw new Error('Sin respuesta de la ECU. Abre el switch o enciende el motor.');
+
+        const dpRaw = await sendCmd('ATDP');
+        ecuInfo.proto = dpRaw.replace(/[\r\n>]/g, '').replace('AUTO,', '').trim() || 'CAN 29-bit';
+        isCanProtocol = /CAN|15765/i.test(ecuInfo.proto);
+
+        supportedPids.clear();
+        parseBitmask(pay00, 0x00);
+        if (supportedPids.has('20')) parseBitmask(reassemblePayload(await sendCmd('0120'), '4120'), 0x20);
+        if (supportedPids.has('40')) parseBitmask(reassemblePayload(await sendCmd('0140'), '4140'), 0x40);
+        logDebug(`PIDs (${supportedPids.size}): ` + [...supportedPids].join(','));
+
+        const desiredFast = ['0C','0D','0B','10','06','07','34','15','0E','04','2E','4C','45'];
+        const desiredSlow = ['03','05','0F','3C','44','43','11','46','47','49','4A','2C','2D','32','33','2F','42','1F'];
+        fastPidList = desiredFast.filter(p => supportedPids.has(p));
+        slowPidList = desiredSlow.filter(p => supportedPids.has(p));
+        if (!fastPidList.length) fastPidList = ['0C','0B','10','06','07','05','0D'];
+
+        useMultiPid = false;
+        if (isCanProtocol && fastPidList.length >= 2) {
+          const testRaw = await sendCmd('010C0B', 1500);
+          const tp = parseMode01Payload(reassemblePayload(testRaw, '41'));
+          if (tp.rpm !== undefined && tp.map_kpa !== undefined) useMultiPid = true;
+          logDebug('Multi-PID CAN: ' + (useMultiPid ? 'ACTIVO' : 'Individual'));
+        }
+
+        setStatus('Leyendo VIN, DTC motor/transmisión y monitores...');
+        if (supportedPids.has('01')) parseMode01Payload(reassemblePayload(await sendCmd('0101'), '41'), '01');
+        if (supportedPids.has('30')) parseMode01Payload(reassemblePayload(await sendCmd('0130'), '41'), '30');
+        if (supportedPids.has('31')) parseMode01Payload(reassemblePayload(await sendCmd('0131'), '41'), '31');
+        if (supportedPids.has('21')) parseMode01Payload(reassemblePayload(await sendCmd('0121'), '41'), '21');
+
+        ecuInfo.dtcStored = decodeDTCs(await sendCmd('03', 1800), '43');
+        ecuInfo.dtcPending = decodeDTCs(await sendCmd('07', 1800), '47');
+        ecuInfo.vin = decodeVIN(await sendCmd('0902', 2000));
+
+        el('m_proto').textContent = `${ecuInfo.proto.slice(0, 20)} (${useMultiPid ? 'Multi' : '1x1'})`;
+        el('m_vin').textContent = ecuInfo.vin;
+        el('m_dtc').textContent = `${ecuInfo.dtcStored} (MIL: ${ecuInfo.milOn})`;
+        el('m_pdtc').textContent = ecuInfo.dtcPending;
+        el('m_readiness').textContent = ecuInfo.readiness;
+        el('m_dist').textContent = `${ecuInfo.distCleared || 0} km / ${ecuInfo.warmups || 0} cal • ${supportedPids.size} PIDs`;
+
+        isConnected = true;
+        connPill.textContent = 'CONECTADO';
+        connPill.className = 'pill ok';
+        btnConnect.disabled = true;
+        btnRecord.disabled = false;
+        btnDisconnectSave.disabled = false;
+        setStatus('<b>Conectado al Civic 2008.</b> Pulsa <b>2. Iniciar Grabación</b> para capturar telemetría completa.');
+      } catch (err) {
+        logDebug('ERROR: ' + err.message);
+        setStatus(`<b>Error:</b> ${err.message}`);
+      }
+    };
+
+    // =========================================================================
+    // MOTOR DE MUESTREO DUAL + CÁLCULOS DE INGENIERÍA
+    // =========================================================================
+    function chunkList(arr, size) {
+      const res = [];
+      for (let i = 0; i < arr.length; i += size) res.push(arr.slice(i, i + size));
+      return res;
+    }
+
+    async function pollPidList(pidArray) {
+      const merged = {};
+      if (useMultiPid) {
+        for (const batch of chunkList(pidArray, 5)) {
+          if (!isRecording) break;
+          const raw = await sendCmd('01' + batch.join(''), 1200);
+          Object.assign(merged, parseMode01Payload(reassemblePayload(raw, '41')));
+        }
+      } else {
+        for (const pid of pidArray) {
+          if (!isRecording) break;
+          const raw = await sendCmd('01' + pid, 900);
+          Object.assign(merged, parseMode01Payload(reassemblePayload(raw, '41'), pid));
+        }
+      }
+      return merged;
+    }
+
+    function fmt(v, dec = 2) {
+      return (v === '' || v === undefined || v === null || Number.isNaN(Number(v))) ? '' : Number(v).toFixed(dec);
+    }
+
+    async function recordingLoop() {
+      const t0 = performance.now();
+      let cycle = 0;
+      prevSpdKmh = null;
+      prevTimeSec = null;
+
+      while (isRecording && isConnected) {
+        if (cycle % 5 === 0) {
+          Object.assign(live, await pollPidList(slowPidList));
+        }
+        Object.assign(live, await pollPidList(fastPidList));
+        if (!isRecording) break;
+
+        const elapsedSec = (performance.now() - t0) / 1000;
+        const isoTime = new Date().toISOString();
+
+        const rpm = Number(live.rpm);
+        const map = Number(live.map_kpa);
+        const baro = Number(live.baro_kpa) || 100.0;
+        const maf = Number(live.maf_gs);
+        const iat = Number(live.iat_c);
+        const spd = live.spd_kmh !== '' ? Number(live.spd_kmh) : 0;
+        const stft = live.stft_pct !== '' ? Number(live.stft_pct) : NaN;
+        const ltft = live.ltft_pct !== '' ? Number(live.ltft_pct) : NaN;
+        const trimTotal = (!Number.isNaN(stft) && !Number.isNaN(ltft)) ? (stft + ltft) : NaN;
+        const vacInHg = (!Number.isNaN(map) && map > 0) ? (baro - map) * 0.2953 : NaN;
+
+        // Eficiencia volumétrica implícita R18A1
+        let vePct = NaN;
+        if (rpm > 100 && map > 0 && maf > 0 && !Number.isNaN(iat)) {
+          const maf100 = (rpm / 120.0) * R18_DISPLACEMENT_L * (map / (0.28705 * (iat + 273.15)));
+          if (maf100 > 0) vePct = (maf / maf100) * 100.0;
+        }
+
+        // Temperatura exterior (OBD si existe, si no GPS/Manual) y Delta térmico IAT
+        const extTempVal = live.amb_obd_c !== '' ? Number(live.amb_obd_c) : (envState.extTempC !== '' ? Number(envState.extTempC) : NaN);
+        const deltaIatExt = (!Number.isNaN(iat) && !Number.isNaN(extTempVal)) ? (iat - extTempVal) : NaN;
+
+        // Transmisión 5AT + Aceleración longitudinal
+        const trans = estimateHonda5AT(rpm, spd);
+        let acelMs2 = NaN;
+        if (prevSpdKmh !== null && prevTimeSec !== null && (elapsedSec - prevTimeSec) > 0.05) {
+          acelMs2 = ((spd - prevSpdKmh) / 3.6) / (elapsedSec - prevTimeSec);
+        }
+        prevSpdKmh = spd;
+        prevTimeSec = elapsedSec;
+
+        // Diferencia velocidad OBD vs GPS
+        const gpsSpd = gpsState.speedKmh !== '' ? Number(gpsState.speedKmh) : NaN;
+        const diffVelPct = (!Number.isNaN(gpsSpd) && gpsSpd >= 10 && spd >= 10) ? ((spd - gpsSpd) / gpsSpd) * 100 : NaN;
+
+        // Consumo estimado
+        const afrRef = (live.cmd_afr && Number(live.cmd_afr) > 10) ? Number(live.cmd_afr) : 14.7;
+        const fuelLh = (maf > 0) ? ((maf / afrRef) / 735.0) * 3600.0 : NaN;
+        const fuelKml = (spd > 1 && fuelLh > 0.05) ? (spd / fuelLh) : 0;
+
+        // Actualizar UI
+        el('m_loop').textContent = live.fuel_sys || '--';
+        el('v_rpm').textContent = fmt(rpm, 0) || '--';
+        el('v_spd').textContent = fmt(spd, 0) || '0';
+        el('v_gps_spd').textContent = fmt(gpsSpd, 0) || '--';
+        el('v_ign').textContent = fmt(live.ign_deg, 1) || '--';
+        el('v_trim').textContent = fmt(trimTotal, 2) || '--';
+        el('v_stft').textContent = fmt(stft, 2) || '--';
+        el('v_ltft').textContent = fmt(ltft, 2) || '--';
+        el('v_gear').textContent = trans.gear;
+        el('v_slip').textContent = fmt(trans.slipPct, 1) || '--';
+        el('v_acel').textContent = fmt(acelMs2, 2) || '--';
+        el('v_map').textContent = fmt(map, 0) || '--';
+        el('v_vac').textContent = fmt(vacInHg, 1) || '--';
+        el('v_baro').textContent = fmt(baro, 0) || '--';
+        el('v_maf').textContent = fmt(maf, 2) || '--';
+        el('v_ve').textContent = fmt(vePct, 1) || '--';
+        el('v_load').textContent = fmt(live.load_pct, 1) || '--';
+        el('v_afr1').textContent = fmt(live.o2s1_afr, 2) || '--';
+        el('v_cmdafr').textContent = fmt(live.cmd_afr, 2) || '--';
+        el('v_o2ma').textContent = fmt(live.o2s1_ma, 3) || '--';
+        el('v_o2s2').textContent = fmt(live.o2s2_v, 3) || '--';
+        el('v_o2s2t').textContent = fmt(live.o2s2_stft_pct, 1) || '--';
+        el('v_cat').textContent = fmt(live.cat_temp_c, 0) || '--';
+        el('v_ect').textContent = fmt(live.ect_c, 0) || '--';
+        el('v_iat').textContent = fmt(iat, 0) || '--';
+        el('v_delta_iat').textContent = fmt(deltaIatExt, 1) || '--';
+        el('v_ecu').textContent = fmt(live.ecu_v, 2) || '--';
+        el('v_lh').textContent = fmt(fuelLh, 2) || '--';
+        el('v_kml').textContent = spd > 1 ? fmt(fuelKml, 1) : '0.0';
+        el('v_slope').textContent = fmt(gpsState.slopePct, 1) || '--';
+        el('v_fuel').textContent = fmt(live.fuel_level_pct, 1) || '--';
+        el('v_evap').textContent = fmt(live.evap_purge_pct, 1) || '--';
+        el('v_evapp').textContent = fmt(live.evap_vapor_pa, 1) || '--';
+        el('v_egr').textContent = fmt(live.egr_cmd_pct, 1) || '--';
+        el('v_cvr').textContent = fmt(live.cvr_pct, 1) || '--';
+        el('v_tps').textContent = fmt(live.tps_abs_pct, 1) || '--';
+        el('v_rtps').textContent = fmt(live.tps_rel_pct, 1) || '--';
+
+        // Alertas en vivo
+        const alerts = [];
+        el('card_trim').className = 'card' + (Math.abs(trimTotal) >= 12 ? ' danger' : Math.abs(trimTotal) >= 8 ? ' warn' : '');
+        if (!Number.isNaN(trimTotal) && Math.abs(trimTotal) >= 10) alerts.push(`Trim ${trimTotal > 0 ? 'POBRE' : 'RICO'} (${trimTotal.toFixed(1)}%)`);
+        const o2s2v = Number(live.o2s2_v);
+        el('card_o2s2').className = 'card' + (!Number.isNaN(o2s2v) && o2s2v < 0.15 && Number(live.ect_c) >= 80 ? ' warn' : '');
+        if (!Number.isNaN(o2s2v) && o2s2v < 0.15 && Number(live.ect_c) >= 80) alerts.push(`O2 S2 bajo (${o2s2v.toFixed(3)}V)`);
+        const highSlip = (trans.gear === '4a' || trans.gear === '5a') && spd >= 65 && Number(trans.slipPct) > 12;
+        el('card_trans').className = 'card' + (highSlip ? ' warn' : '');
+        if (highSlip) alerts.push(`Convertidor sin Lock-up en ${trans.gear} (${Number(trans.slipPct).toFixed(1)}%)`);
+
+        if (alerts.length) {
+          alertStrip.style.display = 'block';
+          alertStrip.textContent = 'Alerta: ' + alerts.join(' • ');
+        } else {
+          alertStrip.style.display = 'none';
+        }
+
+        // Guardar fila sincronizada (57 columnas)
+        if (!Number.isNaN(rpm)) {
+          const noteClean = (el('sessionNote').value || '').trim();
+          records.push({
+            timestamp_iso: isoTime,
+            tiempo_seg: elapsedSec.toFixed(2),
+            ac_estado: acState,
+            modo_manejo: driveMode,
+            nota_sesion: noteClean,
+            bucle_combustible: live.fuel_sys,
+            rpm: fmt(rpm, 0),
+            velocidad_obd_kmh: fmt(spd, 0),
+            velocidad_gps_kmh: fmt(gpsSpd, 1),
+            diff_vel_obd_gps_pct: fmt(diffVelPct, 1),
+            aceleracion_ms2: fmt(acelMs2, 2),
+            marcha_5at_est: trans.gear,
+            rpm_por_kmh: fmt(trans.ratio, 2),
+            deslizamiento_tc_pct: fmt(trans.slipPct, 1),
+            altitud_gps_m: fmt(gpsState.altM, 1),
+            pendiente_calle_pct: fmt(gpsState.slopePct, 1),
+            temp_ext_c: fmt(extTempVal, 1),
+            humedad_ext_pct: fmt(envState.extHumPct, 0),
+            fuente_clima: live.amb_obd_c !== '' ? 'OBD_0146' : envState.source,
+            delta_iat_ext_c: fmt(deltaIatExt, 1),
+            map_kpa: fmt(map, 0),
+            vacio_inhg: fmt(vacInHg, 2),
+            baro_kpa: fmt(baro, 0),
+            maf_gs: fmt(maf, 2),
+            ve_implicita_pct: fmt(vePct, 1),
+            stft_pct: fmt(stft, 2),
+            ltft_pct: fmt(ltft, 2),
+            trim_total_pct: fmt(trimTotal, 2),
+            o2_b1s1_lambda: fmt(live.o2s1_lambda, 4),
+            o2_b1s1_afr: fmt(live.o2s1_afr, 2),
+            o2_b1s1_ma: fmt(live.o2s1_ma, 4),
+            cmd_afr: fmt(live.cmd_afr, 2),
+            o2_b1s2_v: fmt(live.o2s2_v, 3),
+            o2_b1s2_stft_pct: fmt(live.o2s2_stft_pct, 2),
+            avance_encendido_deg: fmt(live.ign_deg, 1),
+            carga_calculada_pct: fmt(live.load_pct, 1),
+            carga_absoluta_pct: fmt(live.abs_load_pct, 1),
+            ect_c: fmt(live.ect_c, 0),
+            iat_c: fmt(iat, 0),
+            catalizador_c: fmt(live.cat_temp_c, 1),
+            evap_purga_pct: fmt(live.evap_purge_pct, 1),
+            evap_vapor_pa: fmt(live.evap_vapor_pa, 1),
+            egr_cmd_pct: fmt(live.egr_cmd_pct, 1),
+            egr_err_pct: fmt(live.egr_err_pct, 2),
+            mariposa_cvr_pct: fmt(live.cvr_pct, 2),
+            mariposa_abs_pct: fmt(live.tps_abs_pct, 2),
+            mariposa_rel_pct: fmt(live.tps_rel_pct, 2),
+            mariposa_b_pct: fmt(live.tps_b_pct, 2),
+            pedal_d_pct: fmt(live.pedal_d_pct, 2),
+            pedal_e_pct: fmt(live.pedal_e_pct, 2),
+            consumo_est_lh: fmt(fuelLh, 3),
+            rendimiento_est_kml: fmt(fuelKml, 2),
+            nivel_tanque_pct: fmt(live.fuel_level_pct, 2),
+            voltaje_ecu_v: fmt(live.ecu_v, 3),
+            tiempo_motor_s: fmt(live.runtime_s, 0),
+            monitores_emisiones: ecuInfo.readiness,
+            dtc_confirmados: ecuInfo.dtcStored,
+            dtc_pendientes: ecuInfo.dtcPending
+          });
+
+          const hz = (records.length / Math.max(0.5, elapsedSec)).toFixed(1);
+          btnDisconnectSave.textContent = `3. Desconectar y Guardar CSV (${records.length})`;
+          setStatus(`<b>Grabando:</b> ${records.length} filas • ${elapsedSec.toFixed(0)}s (${hz} Hz) • <b>${acState}</b> / <b>${driveMode}</b>`);
+
+          if (records.length % 10 === 0) {
+            try { localStorage.setItem(BACKUP_KEY, JSON.stringify(records)); } catch (e) {}
+          }
+        }
+        cycle++;
+      }
+    }
+
+    btnRecord.onclick = async () => {
+      isRecording = !isRecording;
+      if (isRecording) {
+        await enableWakeLock();
+        startGpsWatch();
+        connPill.textContent = 'GRABANDO'; connPill.className = 'pill rec';
+        btnRecord.textContent = 'Pausar Grabación'; btnRecord.style.background = '#d97706';
+        recordingLoop();
+      } else {
+        await disableWakeLock();
+        stopGpsWatch();
+        connPill.textContent = 'PAUSADO'; connPill.className = 'pill ok';
+        btnRecord.textContent = 'Reanudar Grabación'; btnRecord.style.background = '#10b981';
+        setStatus(`<b>Pausado:</b> ${records.length} filas acumuladas.`);
+      }
+    };
+
+    function buildCSV(dataArr) {
+      if (!dataArr || !dataArr.length) return '';
+      const headers = Object.keys(dataArr[0]);
+      const lines = [headers.join(',')];
+      for (const row of dataArr) {
+        lines.push(headers.map(h => `"${String(row[h] ?? '').replace(/"/g, '""')}"`).join(','));
+      }
+      return lines.join('\n');
+    }
+
+    function triggerDownload(csvText, fileName) {
+      const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = fileName;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+    }
+
+    btnShareLast.onclick = async () => {
+      if (!lastCsvText) return;
+      const file = new File([lastCsvText], lastCsvName || 'civic_2008_pro.csv', { type: 'text/csv' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: lastCsvName }); return; } catch (e) {}
+      }
+      triggerDownload(lastCsvText, lastCsvName || 'civic_2008_pro.csv');
+      try {
+        await navigator.clipboard.writeText(lastCsvText);
+        setStatus('<b>CSV descargado y copiado al portapapeles.</b>');
+      } catch (e) {}
+    };
+
+    btnDisconnectSave.onclick = async () => {
+      isRecording = false;
+      await disableWakeLock();
+      stopGpsWatch();
+      btnRecord.disabled = true;
+      btnDisconnectSave.disabled = true;
+
+      if (records.length > 0) {
+        try { localStorage.setItem(BACKUP_KEY, JSON.stringify(records)); } catch (e) {}
+        const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        lastCsvName = `civic_2008_pro_${stamp}.csv`;
+        lastCsvText = buildCSV(records);
+        btnShareLast.disabled = false;
+        btnShareLast.textContent = `Compartir (${records.length})`;
+        triggerDownload(lastCsvText, lastCsvName);
+      }
+
+      try { if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); } catch (e) {}
+
+      isConnected = false;
+      connPill.textContent = 'DESCONECTADO'; connPill.className = 'pill';
+      btnConnect.disabled = false;
+      btnRecord.textContent = '2. Iniciar Grabación'; btnRecord.style.background = '#10b981';
+
+      setStatus(records.length > 0
+        ? `<b>Desconectado y guardado (${records.length} filas).</b> Si Bluefy no abrió el diálogo de descarga, pulsa <b>Compartir</b>.`
+        : '<b>Desconectado.</b> Sin filas grabadas en esta sesión.');
+    };
+  </script>
+</body>
+</html>
