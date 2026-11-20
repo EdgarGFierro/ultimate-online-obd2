@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Honda Civic 2008 R18 • HDS Pro v3</title>
+  <title>Honda Civic 2008 R18 • HDS Pro v3.1</title>
   <style>
     :root {
       --bg: #0b1120; --surface: #151f32; --surface-2: #1e293b; --border: #2e3c54;
@@ -39,7 +39,6 @@
     .sub-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px; }
     .btn-sec { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-size: 0.74rem; padding: 8px 6px; }
 
-    /* Selectores independientes + Clima exterior */
     .toggles-panel {
       background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
       padding: 10px; margin-bottom: 10px; display: grid; gap: 9px;
@@ -98,7 +97,7 @@
     }
     summary { cursor: pointer; font-weight: 700; color: var(--muted); }
     #debugLog {
-      margin-top: 8px; max-height: 150px; overflow-y: auto; font-family: ui-monospace, Menlo, monospace;
+      margin-top: 8px; max-height: 170px; overflow-y: auto; font-family: ui-monospace, Menlo, monospace;
       font-size: 0.67rem; color: #93c5fd; white-space: pre-wrap; word-break: break-all;
     }
   </style>
@@ -107,7 +106,7 @@
 
   <div class="header">
     <div>
-      <div class="title">HONDA CIVIC 2008 • HDS PRO v3</div>
+      <div class="title">HONDA CIVIC 2008 • HDS PRO v3.1</div>
       <div class="subtitle">R18A1 1.8L + Caja 5AT + GPS + Clima • 57 variables/fila</div>
     </div>
     <div id="connPill" class="pill">DESCONECTADO</div>
@@ -148,7 +147,7 @@
   </div>
 
   <div class="status-bar" id="statusBar">
-    Abre en <b>Bluefy</b> (iOS) o <b>Chrome</b> (PC/Android). Pulsa <b>Clima GPS</b> antes de salir para registrar temperatura exterior y humedad reales.
+    Abre en <b>Bluefy</b> (iOS) o <b>Chrome</b> (PC/Android). Verifica que <b>Ajustes → Bluefy → Bluetooth</b> esté activo en tu iPhone.
   </div>
 
   <div class="alert-strip" id="alertStrip"></div>
@@ -225,27 +224,37 @@
     </div>
   </div>
 
-  <details>
+  <details open>
     <summary>Consola Técnica ELM327 (diagnóstico de conexión)</summary>
     <div id="debugLog">Esperando conexión...</div>
   </details>
 
   <script>
     // =========================================================================
-    // HONDA CIVIC 2008 R18A1 + SPCA 5AT - PRO TELEMETRY LOGGER v3
+    // HONDA CIVIC 2008 R18A1 + SPCA 5AT - PRO TELEMETRY LOGGER v3.1 (Bluefy Fix)
     // =========================================================================
+    // SOLO strings de 128 bits en minúsculas (requerido por el puente WebBLE de Bluefy iOS)
     const BLE_SERVICES = [
-      0xFFF0, 0xFFE0, 0x18F0,
       '0000fff0-0000-1000-8000-00805f9b34fb',
       '0000ffe0-0000-1000-8000-00805f9b34fb',
       '000018f0-0000-1000-8000-00805f9b34fb',
+      '49535343-fe7d-4ae5-8fa9-9fafd205e455',
       '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
-      'e7810a71-73ae-499d-8c15-faa9aef0c3f2'
+      'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+      'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f',
+      '0000fee7-0000-1000-8000-00805f9b34fb'
     ];
-    const BACKUP_KEY = 'honda_civic_2008_hds_backup_v3';
+    const SKIP_SERVICES = new Set([
+      '1800', '1801', '180a', '180f',
+      '00001800-0000-1000-8000-00805f9b34fb',
+      '00001801-0000-1000-8000-00805f9b34fb',
+      '0000180a-0000-1000-8000-00805f9b34fb',
+      '0000180f-0000-1000-8000-00805f9b34fb'
+    ]);
+
+    const BACKUP_KEY = 'honda_civic_2008_hds_backup_v31';
     const R18_DISPLACEMENT_L = 1.799;
 
-    // Relaciones teóricas RPM/(km/h) con convertidor bloqueado para Civic 2008 1.8L 5AT (SPCA + 205/55R16)
     const HONDA_5AT_RATIOS = [
       { gear: '1a', ratio: 99.31 },
       { gear: '2a', ratio: 57.14 },
@@ -264,7 +273,6 @@
     let lastCsvText = '', lastCsvName = '';
     let wakeLockObj = null, keepAliveAudioCtx = null;
 
-    // Estado de GPS y Clima
     let gpsWatchId = null;
     const gpsState = {
       speedKmh: '', altM: '', lat: '', lon: '', slopePct: '',
@@ -272,14 +280,10 @@
     };
     const envState = { extTempC: '', extHumPct: '', extPressHpa: '', source: 'Sin_dato' };
 
-    // Estado previo para calcular aceleración longitudinal
     let prevSpdKmh = null, prevTimeSec = null;
-
-    // Selectores independientes
     let acState = 'Sin_AC';
     let driveMode = 'Ralenti';
 
-    // Metadatos ECU
     const ecuInfo = {
       elmVer: '--', proto: '--', vin: 'No_disponible',
       dtcStored: 'Ninguno', dtcPending: 'Ninguno',
@@ -287,7 +291,6 @@
       warmups: '', distCleared: '', distMil: ''
     };
 
-    // Sensores vivos
     const live = {
       fuel_sys: '', load_pct: '', ect_c: '', stft_pct: '', ltft_pct: '',
       map_kpa: '', rpm: '', spd_kmh: '', ign_deg: '', iat_c: '', maf_gs: '',
@@ -310,19 +313,25 @@
     const alertStrip = el('alertStrip');
     const debugLog = el('debugLog');
 
+    function formatErr(err) {
+      if (!err) return 'Rechazo sin detalle (verifica Bluetooth en Ajustes de iOS)';
+      if (typeof err === 'string') return err;
+      if (err.message) return err.message;
+      if (err.name) return err.name;
+      try { return JSON.stringify(err); } catch (e) { return String(err); }
+    }
+
     function logDebug(msg) {
       const t = new Date().toTimeString().slice(0, 8);
-      debugLog.textContent = `[${t}] ${msg}\n` + debugLog.textContent.slice(0, 4000);
+      debugLog.textContent = `[${t}] ${msg}\n` + debugLog.textContent.slice(0, 4500);
     }
     function setStatus(html) { statusBar.innerHTML = html; }
 
-    // Selectores A/C y Manejo
     el('btnAcOff').onclick = () => { acState = 'Sin_AC'; el('btnAcOff').className = 'active-green'; el('btnAcOn').className = ''; };
     el('btnAcOn').onclick = () => { acState = 'Con_AC'; el('btnAcOff').className = ''; el('btnAcOn').className = 'active-cyan'; };
     el('btnIdle').onclick = () => { driveMode = 'Ralenti'; el('btnIdle').className = 'active-blue'; el('btnDrive').className = ''; };
     el('btnDrive').onclick = () => { driveMode = 'Movimiento'; el('btnIdle').className = ''; el('btnDrive').className = 'active-amber'; };
 
-    // Entradas manuales de clima
     el('extTempInput').addEventListener('input', () => {
       envState.extTempC = el('extTempInput').value;
       envState.source = 'Manual';
@@ -331,7 +340,6 @@
       envState.extHumPct = el('extHumInput').value;
     });
 
-    // Recuperar respaldo previo
     (function checkBackup() {
       try {
         const raw = localStorage.getItem(BACKUP_KEY);
@@ -348,7 +356,7 @@
     })();
 
     // =========================================================================
-    // CLIMA EXTERIOR AUTOMÁTICO (Open-Meteo sin API Key) + GPS EN VIVO
+    // CLIMA EXTERIOR AUTOMÁTICO + GPS EN VIVO
     // =========================================================================
     function haversineMeters(lat1, lon1, lat2, lon2) {
       const R = 6371000;
@@ -386,9 +394,7 @@
               gpsState.prevLon = c.longitude;
             }
           }
-        }, (err) => {
-          logDebug('GPS aviso: ' + err.message);
-        }, { enableHighAccuracy: true, maximumAge: 1500, timeout: 5000 });
+        }, () => {}, { enableHighAccuracy: true, maximumAge: 1500, timeout: 5000 });
       } catch (e) {}
     }
 
@@ -419,21 +425,20 @@
             el('extTempInput').value = envState.extTempC;
             el('extHumInput').value = envState.extHumPct;
             btnWeather.textContent = `${envState.extTempC}°C / ${envState.extHumPct}%`;
-            setStatus(`<b>Clima cargado:</b> ${envState.extTempC} °C, humedad ${envState.extHumPct}%, presión ${envState.extPressHpa} hPa. Ya puedes desconectar datos si gustas.`);
-            logDebug(`Clima GPS: ${envState.extTempC}C, ${envState.extHumPct}%, ${envState.extPressHpa}hPa`);
+            setStatus(`<b>Clima cargado:</b> ${envState.extTempC} °C, humedad ${envState.extHumPct}%, presión ${envState.extPressHpa} hPa.`);
           }
         } catch (e) {
           btnWeather.textContent = 'Sin Red';
-          setStatus('No hubo internet para descargar clima; escribe la temperatura exterior manualmente.');
+          setStatus('Sin internet para clima; escribe la temperatura exterior manualmente.');
         }
-      }, (err) => {
+      }, () => {
         btnWeather.textContent = 'GPS Negado';
         setStatus('Permiso de GPS denegado; escribe la temperatura exterior manualmente.');
       }, { enableHighAccuracy: true, timeout: 8000 });
     };
 
     // =========================================================================
-    // WAKE LOCK (Pantalla encendida durante grabación)
+    // WAKE LOCK
     // =========================================================================
     async function enableWakeLock() {
       let method = 'Sistema';
@@ -471,10 +476,12 @@
     });
 
     // =========================================================================
-    // COMUNICACIÓN BLE + REENSAMBLADO ISO-TP CAN
+    // COMUNICACIÓN BLE COMPATIBLE CON BLUEFY iOS Y CHROME
     // =========================================================================
     function onNotify(event) {
-      rxBuffer += new TextDecoder().decode(event.target.value);
+      const val = event && event.target && event.target.value;
+      if (!val) return;
+      rxBuffer += new TextDecoder().decode(val);
       if (rxBuffer.includes('>') && resolvePrompt) {
         const out = rxBuffer;
         rxBuffer = '';
@@ -484,7 +491,7 @@
       }
     }
 
-    function sendCmd(cmd, timeoutMs = 1300) {
+    function sendCmd(cmd, timeoutMs = 1400) {
       return new Promise(async (resolve) => {
         if (!txChar) return resolve('');
         rxBuffer = '';
@@ -492,9 +499,13 @@
         resolvePrompt = (data) => { clearTimeout(timer); resolve(data); };
         const bytes = new TextEncoder().encode(cmd + '\r');
         try {
-          await txChar.writeValueWithoutResponse(bytes);
+          if (txChar.writeValueWithoutResponse) {
+            await txChar.writeValueWithoutResponse(bytes);
+          } else {
+            await txChar.writeValue(bytes);
+          }
         } catch (e) {
-          await txChar.writeValue(bytes).catch(() => {});
+          try { await txChar.writeValue(bytes); } catch (e2) {}
         }
       });
     }
@@ -679,44 +690,98 @@
     }
 
     // =========================================================================
-    // CONEXIÓN HONDA CAN 29-BIT
+    // CONEXIÓN UNIVERSAL BLE (BLUEFY + CHROME) + HONDA CAN 29-BIT
     // =========================================================================
+    function handleDisconnect() {
+      isConnected = false; isRecording = false;
+      disableWakeLock(); stopGpsWatch();
+      connPill.textContent = 'DESCONECTADO'; connPill.className = 'pill';
+      btnConnect.disabled = false; btnRecord.disabled = true;
+      logDebug('Bluetooth desconectado.');
+    }
+
     btnConnect.onclick = async () => {
+      let step = 'Verificando Web Bluetooth';
       try {
-        setStatus('Buscando adaptador <b>ELM327 BLE</b>...');
+        if (!navigator.bluetooth) {
+          throw new Error('Este navegador no soporta Bluetooth. Ábrelo en Bluefy (iOS) o Chrome (PC/Android).');
+        }
+
+        step = 'Abriendo selector de dispositivos BLE';
+        setStatus('Buscando adaptador <b>ELM327 BLE</b>... selecciona tu escáner en la lista.');
         bleDevice = await navigator.bluetooth.requestDevice({
           acceptAllDevices: true,
           optionalServices: BLE_SERVICES
         });
 
-        bleDevice.addEventListener('gattserverdisconnected', () => {
-          isConnected = false; isRecording = false;
-          disableWakeLock(); stopGpsWatch();
-          connPill.textContent = 'DESCONECTADO'; connPill.className = 'pill';
-          btnConnect.disabled = false; btnRecord.disabled = true;
-          logDebug('Bluetooth desconectado.');
-        });
+        logDebug('Dispositivo elegido: ' + (bleDevice.name || bleDevice.id || 'ELM327'));
 
+        if (bleDevice.addEventListener) {
+          bleDevice.addEventListener('gattserverdisconnected', handleDisconnect);
+        } else {
+          bleDevice.ongattserverdisconnected = handleDisconnect;
+        }
+
+        step = 'Conectando servidor GATT';
+        setStatus('Conectando por Bluetooth con <b>' + (bleDevice.name || 'ELM327') + '</b>...');
         const server = await bleDevice.gatt.connect();
-        let service = null;
-        for (const uuid of BLE_SERVICES) {
-          try { service = await server.getPrimaryService(uuid); break; } catch (e) {}
-        }
-        if (!service) throw new Error('Servicio BLE del ELM327 no encontrado.');
 
-        const chars = await service.getCharacteristics();
+        step = 'Descubriendo servicios BLE';
+        let services = [];
+        if (server.getPrimaryServices) {
+          try {
+            services = await server.getPrimaryServices();
+          } catch (e) {
+            logDebug('getPrimaryServices() fallback: ' + formatErr(e));
+          }
+        }
+        if (!services || services.length === 0) {
+          for (const uuid of BLE_SERVICES) {
+            try {
+              const s = await server.getPrimaryService(uuid);
+              if (s) services.push(s);
+            } catch (e) {}
+          }
+        }
+
+        logDebug('Servicios encontrados: ' + services.map(s => s.uuid).join(', '));
+
+        step = 'Buscando canales RX/TX';
         rxChar = null; txChar = null;
-        for (const c of chars) {
-          if (c.properties.notify || c.properties.indicate) rxChar = c;
-          if (c.properties.write || c.properties.writeWithoutResponse) txChar = c;
+        for (const srv of services) {
+          const suuid = String(srv.uuid || '').toLowerCase();
+          if (SKIP_SERVICES.has(suuid)) continue;
+          let chars = [];
+          try { chars = await srv.getCharacteristics(); } catch (e) { continue; }
+          let localRx = null, localTx = null;
+          for (const c of chars) {
+            const props = c.properties || {};
+            logDebug(`  Char ${c.uuid} -> notify:${!!props.notify} ind:${!!props.indicate} write:${!!props.write} wnr:${!!props.writeWithoutResponse}`);
+            if (props.notify || props.indicate) localRx = c;
+            if (props.write || props.writeWithoutResponse) localTx = c;
+          }
+          if (localRx && localTx) {
+            rxChar = localRx;
+            txChar = localTx;
+            break;
+          }
         }
-        if (!rxChar || !txChar) throw new Error('Características RX/TX no encontradas.');
 
+        if (!rxChar || !txChar) {
+          throw new Error('No se encontraron canales RX/TX en este adaptador. Verifica que sea ELM327 BLE 4.0+ (no Bluetooth clásico 2.0).');
+        }
+
+        step = 'Activando notificaciones RX';
         await rxChar.startNotifications();
-        rxChar.addEventListener('characteristicvaluechanged', onNotify);
+        if (rxChar.addEventListener) {
+          rxChar.addEventListener('characteristicvaluechanged', onNotify);
+        } else {
+          rxChar.oncharacteristicvaluechanged = onNotify;
+        }
 
-        setStatus('Inicializando ECU <b>Honda Civic CAN 29-bit</b>...');
-        const ver = await sendCmd('ATZ', 2000);
+        step = 'Inicializando chip ELM327 (ATZ)';
+        setStatus('Inicializando chip ELM327 y buscando ECU <b>Honda CAN 29-bit</b>...');
+        const ver = await sendCmd('ATZ', 2200);
         ecuInfo.elmVer = ver.replace(/[\r\n>]/g, ' ').trim().slice(0, 24) || 'ELM327';
         logDebug('ATZ: ' + ecuInfo.elmVer);
 
@@ -726,16 +791,19 @@
         await sendCmd('ATH0');
         await sendCmd('ATAT1');
 
+        step = 'Conectando con ECU Honda Civic';
         await sendCmd('ATSP7');
-        let p00 = await sendCmd('0100', 2200);
+        let p00 = await sendCmd('0100', 2400);
         let pay00 = reassemblePayload(p00, '4100');
         if (!pay00) {
-          logDebug('ATSP7 sin respuesta -> cambiando a ATSP0...');
+          logDebug('ATSP7 sin respuesta -> probando ATSP0 (Auto)...');
           await sendCmd('ATSP0');
-          p00 = await sendCmd('0100', 3000);
+          p00 = await sendCmd('0100', 3200);
           pay00 = reassemblePayload(p00, '4100');
         }
-        if (!pay00) throw new Error('Sin respuesta de la ECU. Abre el switch o enciende el motor.');
+        if (!pay00) {
+          throw new Error('El ELM327 conectó al teléfono, pero la ECU del Civic no respondió. Abre el switch en ON (II) o enciende el motor.');
+        }
 
         const dpRaw = await sendCmd('ATDP');
         ecuInfo.proto = dpRaw.replace(/[\r\n>]/g, '').replace('AUTO,', '').trim() || 'CAN 29-bit';
@@ -761,6 +829,7 @@
           logDebug('Multi-PID CAN: ' + (useMultiPid ? 'ACTIVO' : 'Individual'));
         }
 
+        step = 'Leyendo VIN y códigos DTC';
         setStatus('Leyendo VIN, DTC motor/transmisión y monitores...');
         if (supportedPids.has('01')) parseMode01Payload(reassemblePayload(await sendCmd('0101'), '41'), '01');
         if (supportedPids.has('30')) parseMode01Payload(reassemblePayload(await sendCmd('0130'), '41'), '30');
@@ -786,8 +855,9 @@
         btnDisconnectSave.disabled = false;
         setStatus('<b>Conectado al Civic 2008.</b> Pulsa <b>2. Iniciar Grabación</b> para capturar telemetría completa.');
       } catch (err) {
-        logDebug('ERROR: ' + err.message);
-        setStatus(`<b>Error:</b> ${err.message}`);
+        const msg = formatErr(err);
+        logDebug(`ERROR en [${step}]: ${msg}`);
+        setStatus(`<b>Error en ${step}:</b> ${msg}`);
       }
     };
 
@@ -849,18 +919,15 @@
         const trimTotal = (!Number.isNaN(stft) && !Number.isNaN(ltft)) ? (stft + ltft) : NaN;
         const vacInHg = (!Number.isNaN(map) && map > 0) ? (baro - map) * 0.2953 : NaN;
 
-        // Eficiencia volumétrica implícita R18A1
         let vePct = NaN;
         if (rpm > 100 && map > 0 && maf > 0 && !Number.isNaN(iat)) {
           const maf100 = (rpm / 120.0) * R18_DISPLACEMENT_L * (map / (0.28705 * (iat + 273.15)));
           if (maf100 > 0) vePct = (maf / maf100) * 100.0;
         }
 
-        // Temperatura exterior (OBD si existe, si no GPS/Manual) y Delta térmico IAT
         const extTempVal = live.amb_obd_c !== '' ? Number(live.amb_obd_c) : (envState.extTempC !== '' ? Number(envState.extTempC) : NaN);
         const deltaIatExt = (!Number.isNaN(iat) && !Number.isNaN(extTempVal)) ? (iat - extTempVal) : NaN;
 
-        // Transmisión 5AT + Aceleración longitudinal
         const trans = estimateHonda5AT(rpm, spd);
         let acelMs2 = NaN;
         if (prevSpdKmh !== null && prevTimeSec !== null && (elapsedSec - prevTimeSec) > 0.05) {
@@ -869,16 +936,13 @@
         prevSpdKmh = spd;
         prevTimeSec = elapsedSec;
 
-        // Diferencia velocidad OBD vs GPS
         const gpsSpd = gpsState.speedKmh !== '' ? Number(gpsState.speedKmh) : NaN;
         const diffVelPct = (!Number.isNaN(gpsSpd) && gpsSpd >= 10 && spd >= 10) ? ((spd - gpsSpd) / gpsSpd) * 100 : NaN;
 
-        // Consumo estimado
         const afrRef = (live.cmd_afr && Number(live.cmd_afr) > 10) ? Number(live.cmd_afr) : 14.7;
         const fuelLh = (maf > 0) ? ((maf / afrRef) / 735.0) * 3600.0 : NaN;
         const fuelKml = (spd > 1 && fuelLh > 0.05) ? (spd / fuelLh) : 0;
 
-        // Actualizar UI
         el('m_loop').textContent = live.fuel_sys || '--';
         el('v_rpm').textContent = fmt(rpm, 0) || '--';
         el('v_spd').textContent = fmt(spd, 0) || '0';
@@ -917,7 +981,6 @@
         el('v_tps').textContent = fmt(live.tps_abs_pct, 1) || '--';
         el('v_rtps').textContent = fmt(live.tps_rel_pct, 1) || '--';
 
-        // Alertas en vivo
         const alerts = [];
         el('card_trim').className = 'card' + (Math.abs(trimTotal) >= 12 ? ' danger' : Math.abs(trimTotal) >= 8 ? ' warn' : '');
         if (!Number.isNaN(trimTotal) && Math.abs(trimTotal) >= 10) alerts.push(`Trim ${trimTotal > 0 ? 'POBRE' : 'RICO'} (${trimTotal.toFixed(1)}%)`);
@@ -935,7 +998,6 @@
           alertStrip.style.display = 'none';
         }
 
-        // Guardar fila sincronizada (57 columnas)
         if (!Number.isNaN(rpm)) {
           const noteClean = (el('sessionNote').value || '').trim();
           records.push({
