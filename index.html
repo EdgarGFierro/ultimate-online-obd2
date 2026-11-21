@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Honda Civic 2008 R18 • HDS Pro v3.2</title>
+  <title>Honda Civic 2008 R18 • HDS Pro v3.3</title>
   <style>
     :root {
       --bg: #0b1120; --surface: #151f32; --surface-2: #1e293b; --border: #2e3c54;
@@ -71,6 +71,16 @@
       margin-bottom: 10px; background: rgba(245,158,11,0.14); border: 1px solid var(--amber); color: #fcd34d;
     }
 
+    .csv-box {
+      display: none; background: var(--surface); border: 1px solid var(--green);
+      border-radius: 10px; padding: 10px; margin-bottom: 10px;
+    }
+    .csv-box-title { font-size: 0.76rem; font-weight: 700; color: #34d399; margin-bottom: 6px; }
+    #csvOutputArea {
+      width: 100%; height: 90px; background: var(--bg); color: #e2e8f0; border: 1px solid var(--border);
+      border-radius: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 0.65rem; padding: 6px;
+    }
+
     .ecu-meta {
       display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px;
       background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;
@@ -97,7 +107,7 @@
     }
     summary { cursor: pointer; font-weight: 700; color: var(--muted); }
     #debugLog {
-      margin-top: 8px; max-height: 170px; overflow-y: auto; font-family: ui-monospace, Menlo, monospace;
+      margin-top: 8px; max-height: 180px; overflow-y: auto; font-family: ui-monospace, Menlo, monospace;
       font-size: 0.67rem; color: #93c5fd; white-space: pre-wrap; word-break: break-all;
     }
   </style>
@@ -106,7 +116,7 @@
 
   <div class="header">
     <div>
-      <div class="title">HONDA CIVIC 2008 • HDS PRO v3.2</div>
+      <div class="title">HONDA CIVIC 2008 • HDS PRO v3.3</div>
       <div class="subtitle">R18A1 1.8L + Caja 5AT + GPS + Clima • 57 variables/fila</div>
     </div>
     <div id="connPill" class="pill">DESCONECTADO</div>
@@ -115,7 +125,7 @@
   <div class="actions">
     <button id="btnConnect">1. Conectar OBDII</button>
     <button id="btnRecord" disabled>2. Iniciar Grabación</button>
-    <button id="btnDisconnectSave" disabled>3. Desconectar y Guardar CSV (0)</button>
+    <button id="btnDisconnectSave" disabled>3. Desconectar y Preparar CSV (0)</button>
   </div>
 
   <div class="sub-actions">
@@ -123,6 +133,12 @@
     <button id="btnScanAll" class="btn-sec" type="button">Buscar Todos</button>
     <button id="btnShareLast" class="btn-sec" disabled>Compartir CSV</button>
     <button id="btnCopyLast" class="btn-sec" disabled>Copiar CSV</button>
+  </div>
+
+  <!-- Caja de exportación directa sin disparar alertas de descarga de Bluefy -->
+  <div class="csv-box" id="csvBox">
+    <div class="csv-box-title" id="csvBoxTitle">Datos listos para enviar o pegar:</div>
+    <textarea id="csvOutputArea" readonly></textarea>
   </div>
 
   <div class="toggles-panel">
@@ -148,7 +164,7 @@
   </div>
 
   <div class="status-bar" id="statusBar">
-    Listo para conectar. Pulsa <b>1. Conectar OBDII</b> (filtra dispositivos sin nombre y reconecta si ya está enlazado en Bluefy).
+    Enciende el motor del Civic y pulsa <b>1. Conectar OBDII</b>.
   </div>
 
   <div class="alert-strip" id="alertStrip"></div>
@@ -232,7 +248,7 @@
 
   <script>
     // =========================================================================
-    // HONDA CIVIC 2008 R18A1 + SPCA 5AT - PRO TELEMETRY LOGGER v3.2
+    // HONDA CIVIC 2008 R18A1 + SPCA 5AT - PRO TELEMETRY LOGGER v3.3
     // =========================================================================
     const BLE_SERVICES = [
       '0000fff0-0000-1000-8000-00805f9b34fb',
@@ -245,16 +261,10 @@
       '0000fee7-0000-1000-8000-00805f9b34fb'
     ];
 
-    // Filtros para ocultar dispositivos sin nombre (AirTags, TVs, relojes) y dejar solo escáneres OBD
     const OBD_FILTERS = [
-      { namePrefix: 'OBD' },
-      { namePrefix: 'ELM' },
-      { namePrefix: 'V-LINK' },
-      { namePrefix: 'Vgate' },
-      { namePrefix: 'Viecar' },
-      { namePrefix: 'KONNWEI' },
-      { namePrefix: 'IOS-Vlink' },
-      { namePrefix: 'BLE' },
+      { namePrefix: 'OBD' }, { namePrefix: 'ELM' }, { namePrefix: 'V-LINK' },
+      { namePrefix: 'Vgate' }, { namePrefix: 'Viecar' }, { namePrefix: 'KONNWEI' },
+      { namePrefix: 'IOS-Vlink' }, { namePrefix: 'BLE' },
       { services: ['0000fff0-0000-1000-8000-00805f9b34fb'] },
       { services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] },
       { services: ['000018f0-0000-1000-8000-00805f9b34fb'] },
@@ -269,7 +279,7 @@
       '0000180f-0000-1000-8000-00805f9b34fb'
     ]);
 
-    const BACKUP_KEY = 'honda_civic_2008_hds_backup_v32';
+    const BACKUP_KEY = 'honda_civic_2008_hds_backup_v33';
     const R18_DISPLACEMENT_L = 1.799;
 
     const HONDA_5AT_RATIOS = [
@@ -332,16 +342,16 @@
     const debugLog = el('debugLog');
 
     function formatErr(err) {
-      if (!err) return 'Operación cancelada';
+      if (!err) return 'Cancelado';
       if (typeof err === 'string') return err;
       if (err.message) return err.message;
-      if (String(err) === '2' || err.code === 2) return 'Selector cerrado sin elegir dispositivo (revisa si OBDII ya estaba conectado en Bluefy)';
+      if (String(err) === '2' || err.code === 2) return 'Selector cerrado sin elegir dispositivo';
       try { return JSON.stringify(err); } catch (e) { return String(err); }
     }
 
     function logDebug(msg) {
       const t = new Date().toTimeString().slice(0, 8);
-      debugLog.textContent = `[${t}] ${msg}\n` + debugLog.textContent.slice(0, 4500);
+      debugLog.textContent = `[${t}] ${msg}\n` + debugLog.textContent.slice(0, 5000);
     }
     function setStatus(html) { statusBar.innerHTML = html; }
 
@@ -358,17 +368,24 @@
       envState.extHumPct = el('extHumInput').value;
     });
 
+    function showCsvReady(csvText, fileName, rowCount) {
+      lastCsvText = csvText;
+      lastCsvName = fileName;
+      btnShareLast.disabled = false;
+      btnCopyLast.disabled = false;
+      btnShareLast.textContent = `Compartir (${rowCount})`;
+      el('csvBox').style.display = 'block';
+      el('csvBoxTitle').textContent = `CSV listo (${rowCount} filas) — pulsa Copiar CSV o Compartir:`;
+      el('csvOutputArea').value = csvText;
+    }
+
     (function checkBackup() {
       try {
         const raw = localStorage.getItem(BACKUP_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            lastCsvText = buildCSV(parsed);
-            lastCsvName = `civic_2008_respaldo_${parsed.length}filas.csv`;
-            btnShareLast.disabled = false;
-            btnCopyLast.disabled = false;
-            btnShareLast.textContent = `Respaldo (${parsed.length})`;
+            showCsvReady(buildCSV(parsed), `civic_2008_respaldo_${parsed.length}filas.csv`, parsed.length);
           }
         }
       } catch (e) {}
@@ -476,7 +493,7 @@
     }
 
     // =========================================================================
-    // COMUNICACIÓN BLE + AUTO-RECONEXIÓN DE DISPOSITIVOS YA AUTORIZADOS EN BLUEFY
+    // COMUNICACIÓN BLE + REENSAMBLADO ROBUSTO
     // =========================================================================
     function onNotify(event) {
       const val = event && event.target && event.target.value;
@@ -491,7 +508,7 @@
       }
     }
 
-    function sendCmd(cmd, timeoutMs = 1400) {
+    function sendCmd(cmd, timeoutMs = 1500) {
       return new Promise(async (resolve) => {
         if (!txChar) return resolve('');
         rxBuffer = '';
@@ -512,16 +529,20 @@
 
     function reassemblePayload(raw, modeReply = '41') {
       if (!raw) return '';
-      const lines = raw.split(/[\r\n]+/).map(l => l.trim()).filter(Boolean);
+      // Separa "SEARCHING..." sin descartar los bytes hexadecimales que vengan pegados
+      const unsearched = raw.replace(/SEARCHING\.*/gi, '\n');
+      const lines = unsearched.split(/[\r\n]+/).map(l => l.trim()).filter(Boolean);
       const clean = [];
       for (const ln of lines) {
         const up = ln.toUpperCase().replace(/>/g, '').trim();
-        if (!up || /SEARCHING|NO DATA|STOPPED|ERROR|UNABLE|OK|\?/.test(up)) continue;
+        if (!up || /NO DATA|STOPPED|ERROR|UNABLE|BUS INIT|CAN ERROR|OK|\?/.test(up)) continue;
         clean.push(up);
       }
+
+      // 1. Tramas ISO-TP indexadas ("0:...", "1:...")
       const frames = [];
       for (const ln of clean) {
-        const m = ln.match(/^([0-9A-F]):\s*([0-9A-F\s]+)$/);
+        const m = ln.match(/(?:^|\s)([0-9A-F]):\s*([0-9A-F\s]+)$/);
         if (m) {
           const idx = parseInt(m[1], 16);
           const hex = m[2].replace(/\s+/g, '');
@@ -534,9 +555,33 @@
         const pos = joined.indexOf(modeReply);
         return pos !== -1 ? joined.slice(pos + modeReply.length) : '';
       }
+
+      // 2. Tramas CAN crudas con cabecera (ej. "18DAF110 10 0D 41..." + "18DAF110 21 ...")
+      const rawCf = [];
+      let targetHdr = null;
+      for (const ln of clean) {
+        const h = ln.replace(/[^0-9A-F]/g, '');
+        const m = h.match(/^(18DAF1[0-9A-F]{2})([0-9A-F]+)$/) || h.match(/^(7E[8-F])([0-9A-F]+)$/);
+        if (m) {
+          const hdr = m[1], body = m[2];
+          if (!targetHdr) targetHdr = hdr;
+          if (hdr !== targetHdr) continue;
+          if (body.startsWith('10') && body.length >= 6) rawCf.push(body.slice(4));
+          else if (/^2[0-9A-F]/.test(body) && body.length >= 4) rawCf.push(body.slice(2));
+        }
+      }
+      if (rawCf.length > 0) {
+        const joined = rawCf.join('');
+        const pos = joined.indexOf(modeReply);
+        return pos !== -1 ? joined.slice(pos + modeReply.length) : '';
+      }
+
+      // 3. Trama única (con o sin cabeceras CAN/ISO y con o sin espacios)
       for (const ln of clean) {
         const hex = ln.replace(/[^0-9A-F]/g, '');
-        if (hex.startsWith(modeReply)) return hex.slice(modeReply.length);
+        if (hex.length <= 6 && hex.startsWith('01') && modeReply.startsWith('41')) continue;
+        const pos = hex.indexOf(modeReply);
+        if (pos !== -1) return hex.slice(pos + modeReply.length);
       }
       return '';
     }
@@ -753,37 +798,40 @@
         rxChar.oncharacteristicvaluechanged = onNotify;
       }
 
-      setStatus('Inicializando chip ELM327 y ECU <b>Honda Civic 2008</b>...');
+      setStatus('Inicializando chip ELM327 y buscando ECU del Civic...');
       const ver = await sendCmd('ATZ', 2200);
       ecuInfo.elmVer = ver.replace(/[\r\n>]/g, ' ').trim().slice(0, 24) || 'ELM327';
       logDebug('Chip: ' + ecuInfo.elmVer);
 
-      await sendCmd('ATE0');
-      await sendCmd('ATL0');
-      await sendCmd('ATS0');
-      await sendCmd('ATH0');
-      await sendCmd('ATAT1');
+      await sendCmd('ATE0', 800);
+      await sendCmd('ATL0', 800);
+      await sendCmd('ATS0', 800);
+      await sendCmd('ATH0', 800);
 
-      await sendCmd('ATSP7');
-      let p00 = await sendCmd('0100', 2400);
+      // Secuencia idéntica a Car Scanner: Auto-protocolo (ATSP0) primero con 6s para escanear bus
+      await sendCmd('ATSP0', 1000);
+      let p00 = await sendCmd('0100', 6000);
+      logDebug('Resp 0100 (Auto): ' + p00.replace(/[\r\n]+/g, ' | ').slice(0, 120));
       let pay00 = reassemblePayload(p00, '4100');
+
       if (!pay00) {
-        await sendCmd('ATSP0');
-        p00 = await sendCmd('0100', 3200);
+        await sendCmd('ATSP7', 1000);
+        p00 = await sendCmd('0100', 3500);
+        logDebug('Resp 0100 (SP7): ' + p00.replace(/[\r\n]+/g, ' | ').slice(0, 120));
         pay00 = reassemblePayload(p00, '4100');
       }
       if (!pay00) {
-        throw new Error('OBDII conectado, pero la ECU no respondió. Abre el switch en ON (II) o enciende el motor.');
+        throw new Error('El chip ELM327 respondió, pero la ECU no contestó a 0100. Verifica que el motor esté encendido.');
       }
 
       const dpRaw = await sendCmd('ATDP');
-      ecuInfo.proto = dpRaw.replace(/[\r\n>]/g, '').replace('AUTO,', '').trim() || 'CAN 29-bit';
+      ecuInfo.proto = dpRaw.replace(/[\r\n>]/g, '').replace('AUTO,', '').trim() || 'CAN';
       isCanProtocol = /CAN|15765/i.test(ecuInfo.proto);
 
       supportedPids.clear();
       parseBitmask(pay00, 0x00);
-      if (supportedPids.has('20')) parseBitmask(reassemblePayload(await sendCmd('0120'), '4120'), 0x20);
-      if (supportedPids.has('40')) parseBitmask(reassemblePayload(await sendCmd('0140'), '4140'), 0x40);
+      if (supportedPids.has('20')) parseBitmask(reassemblePayload(await sendCmd('0120', 2000), '4120'), 0x20);
+      if (supportedPids.has('40')) parseBitmask(reassemblePayload(await sendCmd('0140', 2000), '4140'), 0x40);
       logDebug(`PIDs activos (${supportedPids.size}): ` + [...supportedPids].join(','));
 
       const desiredFast = ['0C','0D','0B','10','06','07','34','15','0E','04','2E','4C','45'];
@@ -794,7 +842,7 @@
 
       useMultiPid = false;
       if (isCanProtocol && fastPidList.length >= 2) {
-        const testRaw = await sendCmd('010C0B', 1500);
+        const testRaw = await sendCmd('010C0B', 1800);
         const tp = parseMode01Payload(reassemblePayload(testRaw, '41'));
         if (tp.rpm !== undefined && tp.map_kpa !== undefined) useMultiPid = true;
       }
@@ -804,9 +852,9 @@
       if (supportedPids.has('31')) parseMode01Payload(reassemblePayload(await sendCmd('0131'), '41'), '31');
       if (supportedPids.has('21')) parseMode01Payload(reassemblePayload(await sendCmd('0121'), '41'), '21');
 
-      ecuInfo.dtcStored = decodeDTCs(await sendCmd('03', 1800), '43');
-      ecuInfo.dtcPending = decodeDTCs(await sendCmd('07', 1800), '47');
-      ecuInfo.vin = decodeVIN(await sendCmd('0902', 2000));
+      ecuInfo.dtcStored = decodeDTCs(await sendCmd('03', 2000), '43');
+      ecuInfo.dtcPending = decodeDTCs(await sendCmd('07', 2000), '47');
+      ecuInfo.vin = decodeVIN(await sendCmd('0902', 2500));
 
       el('m_proto').textContent = `${ecuInfo.proto.slice(0, 20)} (${useMultiPid ? 'Multi' : '1x1'})`;
       el('m_vin').textContent = ecuInfo.vin;
@@ -831,7 +879,7 @@
         const devs = await navigator.bluetooth.getDevices();
         if (devs && devs.length > 0) {
           const obd = devs.find(d => /obd|elm|vgate|viecar|link|konnwei/i.test(d.name || '')) || devs[0];
-          logDebug('Dispositivo previo encontrado en Bluefy: ' + (obd.name || obd.id));
+          logDebug('Dispositivo previo en Bluefy: ' + (obd.name || obd.id));
           return obd;
         }
       } catch (e) {}
@@ -843,24 +891,19 @@
         if (!navigator.bluetooth) {
           throw new Error('Abre esta página en Bluefy (iOS) o Chrome (PC/Android).');
         }
-
-        // 1. Si Bluefy ya tiene OBDII enlazado en segundo plano, intentar conectar directo primero
         const existing = await tryExistingAuthorizedDevice();
         if (existing) {
           try {
             await setupConnectedDevice(existing);
             return;
           } catch (e) {
-            logDebug('Reconexión directa falló, abriendo selector: ' + formatErr(e));
+            logDebug('Reconexión directa falló: ' + formatErr(e));
           }
         }
-
-        // 2. Abrir selector filtrado (oculta dispositivos sin nombre) o completo
         setStatus('Selecciona <b>OBDII</b> en la ventana de Bluetooth...');
         const options = useFilters
           ? { filters: OBD_FILTERS, optionalServices: BLE_SERVICES }
           : { acceptAllDevices: true, optionalServices: BLE_SERVICES };
-
         const chosen = await navigator.bluetooth.requestDevice(options);
         await setupConnectedDevice(chosen);
       } catch (err) {
@@ -873,7 +916,6 @@
     btnConnect.onclick = () => connectFlow(true);
     btnScanAll.onclick = () => connectFlow(false);
 
-    // Al abrir la página, intenta engancharse solo si OBDII ya estaba conectado en Bluefy
     window.addEventListener('load', async () => {
       const existing = await tryExistingAuthorizedDevice();
       if (existing) {
@@ -895,13 +937,13 @@
       if (useMultiPid) {
         for (const batch of chunkList(pidArray, 5)) {
           if (!isRecording) break;
-          const raw = await sendCmd('01' + batch.join(''), 1200);
+          const raw = await sendCmd('01' + batch.join(''), 1300);
           Object.assign(merged, parseMode01Payload(reassemblePayload(raw, '41')));
         }
       } else {
         for (const pid of pidArray) {
           if (!isRecording) break;
-          const raw = await sendCmd('01' + pid, 900);
+          const raw = await sendCmd('01' + pid, 1000);
           Object.assign(merged, parseMode01Payload(reassemblePayload(raw, '41'), pid));
         }
       }
@@ -1082,7 +1124,7 @@
           });
 
           const hz = (records.length / Math.max(0.5, elapsedSec)).toFixed(1);
-          btnDisconnectSave.textContent = `3. Desconectar y Guardar CSV (${records.length})`;
+          btnDisconnectSave.textContent = `3. Desconectar y Preparar CSV (${records.length})`;
           setStatus(`<b>Grabando:</b> ${records.length} filas • ${elapsedSec.toFixed(0)}s (${hz} Hz) • <b>${acState}</b> / <b>${driveMode}</b>`);
 
           if (records.length % 10 === 0) {
@@ -1120,32 +1162,34 @@
       return lines.join('\n');
     }
 
-    function triggerDownload(csvText, fileName) {
-      const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = fileName;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 3000);
-    }
-
     btnCopyLast.onclick = async () => {
       if (!lastCsvText) return;
       try {
         await navigator.clipboard.writeText(lastCsvText);
-        setStatus('<b>CSV copiado al portapapeles.</b> Ya puedes pegarlo aquí o en Notas.');
+        setStatus('<b>¡CSV copiado al portapapeles!</b> Pégalo directo aquí en el chat o en una nota.');
       } catch (e) {
-        setStatus('No se pudo copiar automáticamente; usa <b>Compartir CSV</b>.');
+        el('csvOutputArea').focus();
+        el('csvOutputArea').select();
+        setStatus('Selecciona el texto de la caja verde de arriba y toca <b>Copiar</b>.');
       }
     };
 
     btnShareLast.onclick = async () => {
       if (!lastCsvText) return;
-      const file = new File([lastCsvText], lastCsvName || 'civic_2008_pro.csv', { type: 'text/csv' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try { await navigator.share({ files: [file], title: lastCsvName }); return; } catch (e) {}
+      try {
+        const file = new File([lastCsvText], lastCsvName || 'civic_2008_pro.csv', { type: 'text/csv' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: lastCsvName });
+          return;
+        }
+      } catch (e) {}
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: lastCsvName, text: lastCsvText });
+          return;
+        } catch (e) {}
       }
-      triggerDownload(lastCsvText, lastCsvName || 'civic_2008_pro.csv');
+      setStatus('Usa el botón <b>Copiar CSV</b> de al lado para llevarte todos los datos sin bloqueos.');
     };
 
     btnDisconnectSave.onclick = async () => {
@@ -1158,12 +1202,7 @@
       if (records.length > 0) {
         try { localStorage.setItem(BACKUP_KEY, JSON.stringify(records)); } catch (e) {}
         const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-        lastCsvName = `civic_2008_pro_${stamp}.csv`;
-        lastCsvText = buildCSV(records);
-        btnShareLast.disabled = false;
-        btnCopyLast.disabled = false;
-        btnShareLast.textContent = `Compartir (${records.length})`;
-        triggerDownload(lastCsvText, lastCsvName);
+        showCsvReady(buildCSV(records), `civic_2008_pro_${stamp}.csv`, records.length);
       }
 
       try { if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); } catch (e) {}
@@ -1175,7 +1214,7 @@
       btnRecord.textContent = '2. Iniciar Grabación'; btnRecord.style.background = '#10b981';
 
       setStatus(records.length > 0
-        ? `<b>Desconectado y guardado (${records.length} filas).</b> Usa <b>Compartir</b> o <b>Copiar CSV</b> si no se descargó automático.`
+        ? `<b>Desconectado (${records.length} filas listas).</b> Pulsa <b>Copiar CSV</b> o <b>Compartir</b> sin salir de la página.`
         : '<b>Desconectado.</b> Sin filas grabadas en esta sesión.');
     };
   </script>
