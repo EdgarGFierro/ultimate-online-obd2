@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Honda Civic 2008 R18 • HDS Pro v3.4</title>
+  <title>Honda Civic 2008 R18 • HDS Pro v4.0</title>
   <style>
     :root {
       --bg: #0b1120; --surface: #151f32; --surface-2: #1e293b; --border: #2e3c54;
@@ -13,14 +13,14 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-      background: var(--bg); color: var(--text); margin: 0; padding: 12px 12px 34px;
+      background: var(--bg); color: var(--text); margin: 0; padding: 12px 12px 36px;
     }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
     .title { font-size: 1.05rem; font-weight: 800; color: #38bdf8; letter-spacing: 0.02em; }
     .subtitle { font-size: 0.72rem; color: var(--muted); }
     .pill {
-      font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 999px;
-      background: var(--surface-2); border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.68rem; font-weight: 700; padding: 4px 9px; border-radius: 999px;
+      background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); white-space: nowrap;
     }
     .pill.ok { background: rgba(16,185,129,0.15); border-color: var(--green); color: #34d399; }
     .pill.rec { background: rgba(239,68,68,0.2); border-color: var(--red); color: #fca5a5; animation: pulse 1.4s infinite; }
@@ -29,7 +29,7 @@
     .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
     button {
       border: none; border-radius: 10px; padding: 12px 10px; font-weight: 700;
-      font-size: 0.86rem; color: #fff; cursor: pointer; transition: transform 0.08s, opacity 0.15s;
+      font-size: 0.85rem; color: #fff; cursor: pointer; transition: transform 0.08s, opacity 0.15s;
     }
     button:active:not(:disabled) { transform: scale(0.98); }
     button:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -37,14 +37,14 @@
     #btnRecord { background: var(--green); }
     #btnDisconnectSave { background: var(--red); grid-column: span 2; }
     .sub-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
-    .btn-sec { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-size: 0.71rem; padding: 8px 4px; }
+    .btn-sec { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-size: 0.7rem; padding: 8px 4px; }
 
     .toggles-panel {
       background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
       padding: 10px; margin-bottom: 10px; display: grid; gap: 9px;
     }
-    .toggle-group { display: grid; grid-template-columns: 82px 1fr; align-items: center; gap: 8px; }
-    .toggle-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .toggle-group { display: grid; grid-template-columns: 78px 1fr; align-items: center; gap: 8px; }
+    .toggle-label { font-size: 0.71rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
     .seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg); padding: 3px; border-radius: 9px; border: 1px solid var(--border); gap: 4px; }
     .seg button {
       background: transparent; color: var(--muted); padding: 8px 6px; font-size: 0.82rem;
@@ -75,9 +75,14 @@
       display: none; background: var(--surface); border: 1px solid var(--green);
       border-radius: 10px; padding: 10px; margin-bottom: 10px;
     }
-    .csv-box-title { font-size: 0.76rem; font-weight: 700; color: #34d399; margin-bottom: 6px; }
+    .csv-box-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+    .csv-box-title { font-size: 0.76rem; font-weight: 700; color: #34d399; }
+    .csv-btns { display: flex; gap: 6px; }
+    .csv-btns button { padding: 6px 10px; font-size: 0.72rem; border-radius: 7px; }
+    #btnDownloadCsv { background: var(--blue); }
+    #btnClearCsv { background: #475569; }
     #csvOutputArea {
-      width: 100%; height: 90px; background: var(--bg); color: #e2e8f0; border: 1px solid var(--border);
+      width: 100%; height: 86px; background: var(--bg); color: #e2e8f0; border: 1px solid var(--border);
       border-radius: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 0.65rem; padding: 6px;
     }
 
@@ -86,7 +91,7 @@
       background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;
       font-size: 0.72rem;
     }
-    .ecu-meta div span { color: var(--muted); display: block; font-size: 0.65rem; text-transform: uppercase; }
+    .ecu-meta div span { color: var(--muted); display: block; font-size: 0.64rem; text-transform: uppercase; }
     .ecu-meta div b { color: var(--text); word-break: break-all; }
 
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
@@ -96,10 +101,10 @@
     }
     .card.warn { border-color: var(--amber); }
     .card.danger { border-color: var(--red); }
-    .label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.02em; }
-    .val { font-size: 1.22rem; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .label { font-size: 0.67rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.02em; }
+    .val { font-size: 1.2rem; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
     .unit { font-size: 0.7rem; color: var(--muted); font-weight: 500; }
-    .subval { font-size: 0.69rem; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .subval { font-size: 0.68rem; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
 
     details {
       background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
@@ -108,8 +113,8 @@
     summary { cursor: pointer; font-weight: 700; color: var(--muted); }
     .term-row { display: grid; grid-template-columns: 1fr auto; gap: 6px; margin-top: 8px; }
     #debugLog {
-      margin-top: 8px; max-height: 190px; overflow-y: auto; font-family: ui-monospace, Menlo, monospace;
-      font-size: 0.67rem; color: #93c5fd; white-space: pre-wrap; word-break: break-all;
+      margin-top: 8px; max-height: 220px; overflow-y: auto; font-family: ui-monospace, Menlo, monospace;
+      font-size: 0.66rem; color: #93c5fd; white-space: pre-wrap; word-break: break-all;
     }
   </style>
 </head>
@@ -117,8 +122,8 @@
 
   <div class="header">
     <div>
-      <div class="title">HONDA CIVIC 2008 • HDS PRO v3.4</div>
-      <div class="subtitle">R18A1 1.8L + Caja 5AT + GPS + Clima • 57 variables/fila</div>
+      <div class="title">HONDA CIVIC 2008 • HDS PRO v4.0</div>
+      <div class="subtitle">R18A1 1.8L + 5AT SPCA + GPS + Clima • 60 columnas/fila</div>
     </div>
     <div id="connPill" class="pill">DESCONECTADO</div>
   </div>
@@ -126,18 +131,24 @@
   <div class="actions">
     <button id="btnConnect">1. Conectar OBDII</button>
     <button id="btnRecord" disabled>2. Iniciar Grabación</button>
-    <button id="btnDisconnectSave" disabled>3. Desconectar y Preparar CSV (0)</button>
+    <button id="btnDisconnectSave" disabled>3. Desconectar y Guardar (0)</button>
   </div>
 
   <div class="sub-actions">
     <button id="btnWeather" class="btn-sec" type="button">Clima GPS</button>
     <button id="btnScanAll" class="btn-sec" type="button">Buscar Todos</button>
-    <button id="btnShareLast" class="btn-sec" disabled>Compartir CSV</button>
+    <button id="btnShareLast" class="btn-sec" disabled>Compartir</button>
     <button id="btnCopyLast" class="btn-sec" disabled>Copiar CSV</button>
   </div>
 
   <div class="csv-box" id="csvBox">
-    <div class="csv-box-title" id="csvBoxTitle">Datos listos para enviar o pegar:</div>
+    <div class="csv-box-head">
+      <div class="csv-box-title" id="csvBoxTitle">Datos listos:</div>
+      <div class="csv-btns">
+        <button id="btnDownloadCsv" type="button">Descargar .CSV</button>
+        <button id="btnClearCsv" type="button">Limpiar</button>
+      </div>
+    </div>
     <textarea id="csvOutputArea" readonly></textarea>
   </div>
 
@@ -164,18 +175,18 @@
   </div>
 
   <div class="status-bar" id="statusBar">
-    Enciende el motor del Civic y pulsa <b>1. Conectar OBDII</b>.
+    Enciende el motor del Civic, cierra Car Scanner y pulsa <b>1. Conectar OBDII</b>.
   </div>
 
   <div class="alert-strip" id="alertStrip"></div>
 
   <div class="ecu-meta">
+    <div><span>Chip / Voltaje Bat.</span><b id="m_chip">--</b></div>
     <div><span>Protocolo / Modo</span><b id="m_proto">--</b></div>
     <div><span>VIN Detectado</span><b id="m_vin">--</b></div>
+    <div><span>Monitores Emisiones</span><b id="m_readiness">--</b></div>
     <div><span>DTC Confirmados (M03)</span><b id="m_dtc">--</b></div>
     <div><span>DTC Pendientes (M07)</span><b id="m_pdtc">--</b></div>
-    <div><span>Monitores Emisiones</span><b id="m_readiness">--</b></div>
-    <div><span>Bucle / Distancia</span><b id="m_dist">--</b></div>
   </div>
 
   <div class="grid">
@@ -235,9 +246,9 @@
       <div class="subval">TPS: <span id="v_tps">--</span>% • EGR: <span id="v_egr">--</span>%</div>
     </div>
     <div class="card">
-      <div class="label">EVAP Vapor / Rel TPS</div>
+      <div class="label">EVAP Vapor / Bucle</div>
       <div class="val"><span id="v_evapp">--</span> <span class="unit">Pa</span></div>
-      <div class="subval">Rel: <span id="v_rtps">--</span>% • Bucle: <span id="m_loop">--</span></div>
+      <div class="subval">Rel: <span id="v_rtps">--</span>% • <span id="m_loop">--</span></div>
     </div>
   </div>
 
@@ -247,22 +258,59 @@
       <input id="manualCmdInput" class="note-input" type="text" placeholder="Comando manual (ej: ATI, ATRV, 0100, 010C)" />
       <button id="btnSendManual" class="btn-sec" type="button" style="padding: 8px 12px;">Enviar</button>
     </div>
-    <div id="debugLog">Esperando conexión...</div>
+    <div id="debugLog">Listo. Abre en Safari (pestaña normal con beacio activo) o Chrome.</div>
   </details>
 
   <script>
     // =========================================================================
-    // HONDA CIVIC 2008 R18A1 + SPCA 5AT - PRO TELEMETRY LOGGER v3.4
+    // HONDA CIVIC 2008 R18A1 + SPCA 5AT - PRO TELEMETRY LOGGER v4.0
     // =========================================================================
+    const KNOWN_UART_PROFILES = [
+      {
+        name: 'FFF0 (ELM327 BLE Estándar)',
+        service: '0000fff0-0000-1000-8000-00805f9b34fb',
+        rx: '0000fff1-0000-1000-8000-00805f9b34fb',
+        tx: '0000fff2-0000-1000-8000-00805f9b34fb'
+      },
+      {
+        name: '18F0 (Vgate / Viecar / OBDII)',
+        service: '000018f0-0000-1000-8000-00805f9b34fb',
+        rx: '00002af0-0000-1000-8000-00805f9b34fb',
+        tx: '00002af1-0000-1000-8000-00805f9b34fb'
+      },
+      {
+        name: 'FFE0 (HM-10 / CC2541)',
+        service: '0000ffe0-0000-1000-8000-00805f9b34fb',
+        rx: '0000ffe1-0000-1000-8000-00805f9b34fb',
+        tx: '0000ffe1-0000-1000-8000-00805f9b34fb'
+      },
+      {
+        name: 'ISSC / Microchip Transparent UART',
+        service: '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+        rx: '49535343-1e4d-4bd9-ba61-23c647249616',
+        tx: '49535343-8841-43f4-a8d4-ecbe34729bb3'
+      },
+      {
+        name: 'Nordic UART Service (NUS)',
+        service: '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
+        rx: '6e400003-b5a3-f393-e0a9-e50e24dcca9e',
+        tx: '6e400002-b5a3-f393-e0a9-e50e24dcca9e'
+      },
+      {
+        name: 'Dual-Mode E781',
+        service: 'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+        rx: 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f',
+        tx: 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f'
+      }
+    ];
+
     const BLE_SERVICES = [
-      '0000fff0-0000-1000-8000-00805f9b34fb',
-      '0000ffe0-0000-1000-8000-00805f9b34fb',
-      '000018f0-0000-1000-8000-00805f9b34fb',
-      '49535343-fe7d-4ae5-8fa9-9fafd205e455',
-      '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
-      'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
-      'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f',
-      '0000fee7-0000-1000-8000-00805f9b34fb'
+      ...new Set([
+        ...KNOWN_UART_PROFILES.map(p => p.service),
+        '0000fee7-0000-1000-8000-00805f9b34fb',
+        '0000ae00-0000-1000-8000-00805f9b34fb',
+        '0000ff00-0000-1000-8000-00805f9b34fb'
+      ])
     ];
 
     const OBD_FILTERS = [
@@ -283,7 +331,7 @@
       '0000180f-0000-1000-8000-00805f9b34fb'
     ]);
 
-    const BACKUP_KEY = 'honda_civic_2008_hds_backup_v34';
+    const BACKUP_KEY = 'honda_civic_2008_hds_backup_v40';
     const R18_DISPLACEMENT_L = 1.799;
 
     const HONDA_5AT_RATIOS = [
@@ -295,7 +343,11 @@
     ];
 
     let bleDevice = null, rxChar = null, txChar = null;
+    let txWriteMode = 'auto';
+    let cmdTerminator = '\r';
     let rxBuffer = '', resolvePrompt = null;
+    let cmdQueue = Promise.resolve();
+
     let isConnected = false, isConnecting = false, isRecording = false, useMultiPid = false;
     let isCanProtocol = true;
     let supportedPids = new Set();
@@ -316,7 +368,7 @@
     let driveMode = 'Ralenti';
 
     const ecuInfo = {
-      elmVer: '--', proto: '--', vin: 'No_disponible',
+      elmVer: '--', batV: '--', proto: '--', vin: 'No_disponible',
       dtcStored: 'Ninguno', dtcPending: 'Ninguno',
       milOn: 'NO', dtcCount: 0, readiness: '--',
       warmups: '', distCleared: '', distMil: ''
@@ -339,6 +391,8 @@
     const btnDisconnectSave = el('btnDisconnectSave');
     const btnShareLast = el('btnShareLast');
     const btnCopyLast = el('btnCopyLast');
+    const btnDownloadCsv = el('btnDownloadCsv');
+    const btnClearCsv = el('btnClearCsv');
     const btnWeather = el('btnWeather');
     const connPill = el('connPill');
     const statusBar = el('statusBar');
@@ -346,9 +400,17 @@
     const debugLog = el('debugLog');
 
     const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const normUuid = (u) => {
+      const s = String(u || '').toLowerCase().trim();
+      return s.length === 4 ? `0000${s}-0000-1000-8000-00805f9b34fb` : s;
+    };
+
+    function hasWebBluetooth() {
+      return typeof navigator !== 'undefined' && Boolean(navigator.bluetooth && navigator.bluetooth.requestDevice);
+    }
 
     function formatErr(err) {
-      if (!err) return 'Cancelado';
+      if (!err) return 'Operación cancelada';
       if (typeof err === 'string') return err;
       if (err.message) return err.message;
       if (String(err) === '2' || err.code === 2) return 'Selector cerrado sin elegir dispositivo';
@@ -357,7 +419,7 @@
 
     function logDebug(msg) {
       const t = new Date().toTimeString().slice(0, 8);
-      debugLog.textContent = `[${t}] ${msg}\n` + debugLog.textContent.slice(0, 5500);
+      debugLog.textContent = `[${t}] ${msg}\n` + debugLog.textContent.slice(0, 6000);
     }
     function setStatus(html) { statusBar.innerHTML = html; }
 
@@ -381,7 +443,7 @@
       btnCopyLast.disabled = false;
       btnShareLast.textContent = `Compartir (${rowCount})`;
       el('csvBox').style.display = 'block';
-      el('csvBoxTitle').textContent = `CSV listo (${rowCount} filas) — pulsa Copiar CSV o Compartir:`;
+      el('csvBoxTitle').textContent = `CSV listo (${rowCount} filas)`;
       el('csvOutputArea').value = csvText;
     }
 
@@ -473,7 +535,7 @@
     };
 
     // =========================================================================
-    // WAKE LOCK
+    // WAKE LOCK (Pantalla activa mientras graba)
     // =========================================================================
     async function enableWakeLock() {
       if ('wakeLock' in navigator) {
@@ -499,12 +561,35 @@
     }
 
     // =========================================================================
-    // COMUNICACIÓN BLE SIN DESFASE DE BÚFER (ANTI-RACE CONDITION)
+    // MOTOR BLE: DECODIFICACIÓN SEGURA, COLA SECUENCIAL Y AUTO-SONDEO UART
     // =========================================================================
+    function decodeBleValue(val) {
+      if (!val) return '';
+      if (typeof val === 'string') return val;
+      try {
+        if (val instanceof ArrayBuffer) {
+          return new TextDecoder().decode(new Uint8Array(val));
+        }
+        if (val.buffer && typeof val.byteOffset === 'number' && typeof val.byteLength === 'number') {
+          return new TextDecoder().decode(new Uint8Array(val.buffer, val.byteOffset, val.byteLength));
+        }
+        return new TextDecoder().decode(val);
+      } catch (e) {
+        try {
+          let out = '';
+          for (let i = 0; i < val.byteLength; i++) out += String.fromCharCode(val.getUint8(i));
+          return out;
+        } catch (e2) {
+          return '';
+        }
+      }
+    }
+
     function onNotify(event) {
       const val = event && event.target && event.target.value;
-      if (!val) return;
-      rxBuffer += new TextDecoder().decode(val);
+      const chunk = decodeBleValue(val);
+      if (!chunk) return;
+      rxBuffer += chunk;
       if (rxBuffer.includes('>') && resolvePrompt) {
         const out = rxBuffer;
         rxBuffer = '';
@@ -514,7 +599,52 @@
       }
     }
 
-    function sendCmd(cmd, timeoutMs = 1500, drainMs = 0) {
+    async function writeBytesToChar(charObj, bytes, preferredMode = 'auto') {
+      const props = charObj.properties || {};
+      const canWNR = Boolean(props.writeWithoutResponse) && typeof charObj.writeValueWithoutResponse === 'function';
+      const canWR = Boolean(props.write) && typeof charObj.writeValueWithResponse === 'function';
+      const hasLegacy = typeof charObj.writeValue === 'function';
+
+      const tryList = [];
+      if (preferredMode === 'without') {
+        if (canWNR) tryList.push('without');
+        if (canWR) tryList.push('with');
+        if (hasLegacy) tryList.push('legacy');
+      } else if (preferredMode === 'with') {
+        if (canWR) tryList.push('with');
+        if (hasLegacy) tryList.push('legacy');
+        if (canWNR) tryList.push('without');
+      } else {
+        if (canWR) tryList.push('with');
+        if (canWNR) tryList.push('without');
+        if (hasLegacy) tryList.push('legacy');
+      }
+
+      if (tryList.length === 0) {
+        if (typeof charObj.writeValueWithResponse === 'function') tryList.push('with');
+        if (typeof charObj.writeValueWithoutResponse === 'function') tryList.push('without');
+        if (typeof charObj.writeValue === 'function') tryList.push('legacy');
+      }
+
+      let lastErr = null;
+      for (const mode of tryList) {
+        try {
+          for (let off = 0; off < bytes.length; off += 20) {
+            const slice = bytes.slice(off, off + 20);
+            if (mode === 'without') await charObj.writeValueWithoutResponse(slice);
+            else if (mode === 'with') await charObj.writeValueWithResponse(slice);
+            else await charObj.writeValue(slice);
+          }
+          return mode;
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+      if (lastErr) throw lastErr;
+      return preferredMode;
+    }
+
+    function sendCmdRaw(cmd, timeoutMs = 1500, drainMs = 0, forceMode = null, forceTerm = null) {
       return new Promise(async (resolve) => {
         if (!txChar) return resolve('');
         resolvePrompt = null;
@@ -541,17 +671,20 @@
           finish(data);
         };
 
-        const bytes = new TextEncoder().encode(cmd + '\r');
+        const term = forceTerm !== null ? forceTerm : cmdTerminator;
+        const bytes = new TextEncoder().encode(cmd + term);
         try {
-          if (txChar.writeValueWithoutResponse) {
-            await txChar.writeValueWithoutResponse(bytes);
-          } else {
-            await txChar.writeValue(bytes);
-          }
+          await writeBytesToChar(txChar, bytes, forceMode || txWriteMode);
         } catch (e) {
-          try { await txChar.writeValue(bytes); } catch (e2) {}
+          logDebug(`Write err (${cmd}): ${formatErr(e)}`);
         }
       });
+    }
+
+    function sendCmd(cmd, timeoutMs = 1500, drainMs = 0) {
+      const next = cmdQueue.then(() => sendCmdRaw(cmd, timeoutMs, drainMs));
+      cmdQueue = next.catch(() => {});
+      return next;
     }
 
     el('btnSendManual').onclick = async () => {
@@ -559,10 +692,139 @@
       if (!cmd) return;
       if (!txChar) { logDebug('No hay conexión BLE activa.'); return; }
       logDebug('> ' + cmd);
-      const r = await sendCmd(cmd, 4000, 100);
+      const r = await sendCmd(cmd, 4000, 120);
       logDebug('< ' + (r.replace(/[\r\n]+/g, ' | ') || '(vacío)'));
     };
 
+    async function attachAndProbePair(candidate) {
+      const { rx, tx, label } = candidate;
+      const rxId = normUuid(rx.uuid).slice(4, 8);
+      const txId = normUuid(tx.uuid).slice(4, 8);
+      logDebug(`Probando UART ${label} (RX:${rxId} TX:${txId})...`);
+
+      rxChar = rx;
+      txChar = tx;
+
+      if (rxChar.addEventListener) {
+        rxChar.removeEventListener('characteristicvaluechanged', onNotify);
+        rxChar.addEventListener('characteristicvaluechanged', onNotify);
+      } else {
+        rxChar.oncharacteristicvaluechanged = onNotify;
+      }
+
+      try {
+        await rxChar.startNotifications();
+      } catch (e) {
+        logDebug(`  startNotifications falló: ${formatErr(e)}`);
+        return false;
+      }
+      await sleep(160);
+
+      const attempts = [
+        { mode: 'without', term: '\r' },
+        { mode: 'with', term: '\r' },
+        { mode: 'legacy', term: '\r' },
+        { mode: 'without', term: '\r\n' }
+      ];
+
+      for (const att of attempts) {
+        const resp = await sendCmdRaw('ATI', 950, 80, att.mode, att.term);
+        const cleaned = resp.replace(/[\r\n\x00]+/g, ' ').trim();
+        if (cleaned.length > 0) {
+          txWriteMode = att.mode;
+          cmdTerminator = att.term;
+          logDebug(`  ✓ RESPUESTA en ${label} [${att.mode}]: "${cleaned.slice(0, 60)}"`);
+          return true;
+        }
+      }
+
+      try { await rxChar.stopNotifications(); } catch (e) {}
+      if (rxChar.removeEventListener) rxChar.removeEventListener('characteristicvaluechanged', onNotify);
+      return false;
+    }
+
+    async function discoverAndLockUart(server) {
+      const servicesMap = new Map();
+
+      if (server.getPrimaryServices) {
+        try {
+          const allSrvs = await server.getPrimaryServices();
+          for (const s of allSrvs) servicesMap.set(normUuid(s.uuid), s);
+        } catch (e) {
+          logDebug('getPrimaryServices aviso: ' + formatErr(e));
+        }
+      }
+      for (const uuid of BLE_SERVICES) {
+        if (!servicesMap.has(uuid)) {
+          try {
+            const s = await server.getPrimaryService(uuid);
+            if (s) servicesMap.set(normUuid(s.uuid), s);
+          } catch (e) {}
+        }
+      }
+
+      logDebug(`Servicios BLE (${servicesMap.size}): ` + [...servicesMap.keys()].map(u => u.slice(4, 8)).join(', '));
+
+      const candidates = [];
+      const seenKeys = new Set();
+
+      // 1. Prioridad máxima: perfiles UART OBD-II exactos conocidos
+      for (const prof of KNOWN_UART_PROFILES) {
+        const srv = servicesMap.get(prof.service);
+        if (!srv) continue;
+        try {
+          const chars = await srv.getCharacteristics();
+          const byId = new Map(chars.map(c => [normUuid(c.uuid), c]));
+          const rx = byId.get(prof.rx);
+          const tx = byId.get(prof.tx);
+          if (rx && tx) {
+            const key = `${normUuid(rx.uuid)}|${normUuid(tx.uuid)}`;
+            if (!seenKeys.has(key)) {
+              seenKeys.add(key);
+              candidates.push({ rx, tx, label: prof.name });
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 2. Respaldo genérico: cualquier combinación Notify + Write en servicios no estándar
+      for (const [suuid, srv] of servicesMap.entries()) {
+        if (SKIP_SERVICES.has(suuid)) continue;
+        let chars = [];
+        try { chars = await srv.getCharacteristics(); } catch (e) { continue; }
+        const rxList = [], txList = [];
+        for (const c of chars) {
+          const p = c.properties || {};
+          logDebug(`  Srv ${suuid.slice(4, 8)} Char ${normUuid(c.uuid).slice(4, 8)} [N:${!!p.notify} I:${!!p.indicate} W:${!!p.write} WNR:${!!p.writeWithoutResponse}]`);
+          if (p.notify || p.indicate) rxList.push(c);
+          if (p.write || p.writeWithoutResponse) txList.push(c);
+        }
+        for (const rx of rxList) {
+          for (const tx of txList) {
+            const key = `${normUuid(rx.uuid)}|${normUuid(tx.uuid)}`;
+            if (!seenKeys.has(key)) {
+              seenKeys.add(key);
+              candidates.push({ rx, tx, label: `Genérico ${suuid.slice(4, 8)}` });
+            }
+          }
+        }
+      }
+
+      if (candidates.length === 0) {
+        throw new Error('No se encontraron canales BLE UART en este dispositivo.');
+      }
+
+      for (const cand of candidates) {
+        const ok = await attachAndProbePair(cand);
+        if (ok) return cand;
+      }
+
+      throw new Error('Bluetooth enlazado, pero el chip ELM327 no respondió a ATI en ningún canal. Desconecta y reconecta el adaptador del puerto OBD-II.');
+    }
+
+    // =========================================================================
+    // REENSAMBLADO ISO-TP Y DECODIFICADORES OBD-II
+    // =========================================================================
     function reassemblePayload(raw, modeReply = '41') {
       if (!raw) return '';
       const unsearched = raw.replace(/SEARCHING\.*/gi, '\n');
@@ -618,9 +880,6 @@
       return '';
     }
 
-    // =========================================================================
-    // DECODIFICADORES OBD-II + MONITORES + TRANSMISIÓN 5AT
-    // =========================================================================
     const FUEL_SYS_MAP = {
       1: 'OpenLoop_Frio', 2: 'ClosedLoop_OK', 4: 'OpenLoop_Carga',
       8: 'OpenLoop_Falla', 16: 'ClosedLoop_FallaO2'
@@ -766,6 +1025,9 @@
       return vin.length >= 11 ? vin.slice(0, 17) : 'No_disponible';
     }
 
+    // =========================================================================
+    // CONEXIÓN PRINCIPAL (SIN AUTO-CONEXIÓN EN LOAD)
+    // =========================================================================
     function handleDisconnect() {
       isConnected = false; isConnecting = false; isRecording = false;
       disableWakeLock(); stopGpsWatch();
@@ -779,89 +1041,55 @@
       logDebug('Enlazando con: ' + (bleDevice.name || bleDevice.id || 'OBDII'));
 
       if (bleDevice.addEventListener) {
+        bleDevice.removeEventListener('gattserverdisconnected', handleDisconnect);
         bleDevice.addEventListener('gattserverdisconnected', handleDisconnect);
       } else {
         bleDevice.ongattserverdisconnected = handleDisconnect;
       }
 
-      setStatus('Conectando canales Bluetooth con <b>' + (bleDevice.name || 'OBDII') + '</b>...');
+      setStatus('Conectando por Bluetooth con <b>' + (bleDevice.name || 'OBDII') + '</b>...');
       const server = await bleDevice.gatt.connect();
 
-      let services = [];
-      if (server.getPrimaryServices) {
-        try { services = await server.getPrimaryServices(); } catch (e) {}
-      }
-      if (!services || services.length === 0) {
-        for (const uuid of BLE_SERVICES) {
-          try {
-            const s = await server.getPrimaryService(uuid);
-            if (s) services.push(s);
-          } catch (e) {}
-        }
-      }
+      setStatus('Detectando canal UART real del adaptador ELM327...');
+      await discoverAndLockUart(server);
 
-      rxChar = null; txChar = null;
-      for (const srv of services) {
-        const suuid = String(srv.uuid || '').toLowerCase();
-        if (SKIP_SERVICES.has(suuid)) continue;
-        let chars = [];
-        try { chars = await srv.getCharacteristics(); } catch (e) { continue; }
-        let localRx = null, localTx = null;
-        for (const c of chars) {
-          const props = c.properties || {};
-          if (props.notify || props.indicate) localRx = c;
-          if (props.write || props.writeWithoutResponse) localTx = c;
-        }
-        if (localRx && localTx) {
-          rxChar = localRx;
-          txChar = localTx;
-          break;
-        }
-      }
+      setStatus('Inicializando chip ELM327...');
+      const zResp = await sendCmd('ATZ', 2500, 350);
+      const atiResp = await sendCmd('ATI', 1200, 80);
+      const rawChip = (atiResp || zResp).replace(/[\r\n>]/g, ' ').replace(/AT[ZI]/gi, '').trim();
+      ecuInfo.elmVer = rawChip.slice(0, 22) || 'ELM327 (sin ID)';
 
-      if (!rxChar || !txChar) {
-        throw new Error('No se encontraron canales de datos RX/TX en este adaptador.');
-      }
+      await sendCmd('ATE0', 1000, 80);
+      await sendCmd('ATL0', 1000, 60);
+      await sendCmd('ATS0', 1000, 60);
+      await sendCmd('ATH0', 1000, 60);
+      await sendCmd('ATAT1', 1000, 60);
 
-      await rxChar.startNotifications();
-      if (rxChar.addEventListener) {
-        rxChar.addEventListener('characteristicvaluechanged', onNotify);
-      } else {
-        rxChar.oncharacteristicvaluechanged = onNotify;
-      }
+      const rvResp = await sendCmd('ATRV', 1200, 60);
+      ecuInfo.batV = rvResp.replace(/[\r\n>]/g, '').trim() || '--';
+      el('m_chip').textContent = `${ecuInfo.elmVer} • ${ecuInfo.batV}`;
+      logDebug(`Chip confirmado: ${ecuInfo.elmVer} | Batería: ${ecuInfo.batV}`);
 
-      // 1. Reinicio limpio con drenado de búfer (evita que paquetes divididos desfasen los comandos)
-      setStatus('Reiniciando chip ELM327 (espera 3 segundos)...');
-      const ver = await sendCmd('ATZ', 2500, 400);
-      ecuInfo.elmVer = ver.replace(/[\r\n>]/g, ' ').replace(/ATZ/gi, '').trim().slice(0, 28) || 'ELM327';
-      logDebug('Chip: ' + ecuInfo.elmVer);
-
-      await sendCmd('ATE0', 1000, 100);
-      await sendCmd('ATL0', 1000, 80);
-      await sendCmd('ATS0', 1000, 80);
-      await sendCmd('ATH0', 1000, 80);
-
-      // 2. Búsqueda automática de protocolo (idéntica a Car Scanner)
       setStatus('Buscando protocolo de la ECU Honda Civic...');
-      await sendCmd('ATSP0', 1200, 150);
+      await sendCmd('ATSP0', 1200, 120);
       let p00 = await sendCmd('0100', 8000, 200);
-      logDebug('0100 Auto: ' + (p00.replace(/[\r\n]+/g, ' | ').slice(0, 120) || '(sin respuesta)'));
+      logDebug('0100 Auto: ' + (p00.replace(/[\r\n]+/g, ' | ').slice(0, 120) || '(vacío)'));
       let pay00 = reassemblePayload(p00, '4100');
 
       if (!pay00) {
-        await sendCmd('ATSP7', 1200, 150);
-        p00 = await sendCmd('0100', 4500, 200);
-        logDebug('0100 SP7: ' + (p00.replace(/[\r\n]+/g, ' | ').slice(0, 120) || '(sin respuesta)'));
+        await sendCmd('ATSP7', 1200, 120);
+        p00 = await sendCmd('0100', 4500, 180);
+        logDebug('0100 SP7: ' + (p00.replace(/[\r\n]+/g, ' | ').slice(0, 120) || '(vacío)'));
         pay00 = reassemblePayload(p00, '4100');
       }
       if (!pay00) {
-        await sendCmd('ATSP6', 1200, 150);
-        p00 = await sendCmd('0100', 4500, 200);
-        logDebug('0100 SP6: ' + (p00.replace(/[\r\n]+/g, ' | ').slice(0, 120) || '(sin respuesta)'));
+        await sendCmd('ATSP6', 1200, 120);
+        p00 = await sendCmd('0100', 4500, 180);
+        logDebug('0100 SP6: ' + (p00.replace(/[\r\n]+/g, ' | ').slice(0, 120) || '(vacío)'));
         pay00 = reassemblePayload(p00, '4100');
       }
       if (!pay00) {
-        throw new Error('La ECU no contestó a 0100. Verifica que el motor esté encendido y que Car Scanner esté cerrado.');
+        throw new Error(`El chip respondió (${ecuInfo.batV}), pero la ECU no contestó a 0100. Verifica que el motor esté encendido.`);
       }
 
       const dpRaw = await sendCmd('ATDP', 1000, 80);
@@ -896,12 +1124,11 @@
       ecuInfo.dtcPending = decodeDTCs(await sendCmd('07', 2000, 100), '47');
       ecuInfo.vin = decodeVIN(await sendCmd('0902', 2500, 150));
 
-      el('m_proto').textContent = `${ecuInfo.proto.slice(0, 20)} (${useMultiPid ? 'Multi' : '1x1'})`;
+      el('m_proto').textContent = `${ecuInfo.proto.slice(0, 18)} (${useMultiPid ? 'Multi' : '1x1'} • ${supportedPids.size} PIDs)`;
       el('m_vin').textContent = ecuInfo.vin;
       el('m_dtc').textContent = `${ecuInfo.dtcStored} (MIL: ${ecuInfo.milOn})`;
       el('m_pdtc').textContent = ecuInfo.dtcPending;
       el('m_readiness').textContent = ecuInfo.readiness;
-      el('m_dist').textContent = `${ecuInfo.distCleared || 0} km / ${ecuInfo.warmups || 0} cal • ${supportedPids.size} PIDs`;
 
       isConnected = true;
       connPill.textContent = 'CONECTADO';
@@ -910,43 +1137,18 @@
       btnScanAll.disabled = true;
       btnRecord.disabled = false;
       btnDisconnectSave.disabled = false;
-      setStatus('<b>¡OBDII Conectado!</b> Pulsa el botón verde <b>2. Iniciar Grabación</b> para guardar datos.');
+      setStatus(`<b>¡OBDII Conectado!</b> (${ecuInfo.batV} • ${supportedPids.size} PIDs). Pulsa <b>2. Iniciar Grabación</b>.`);
     }
 
-    async function tryExistingAuthorizedDevice() {
-      if (!navigator.bluetooth || !navigator.bluetooth.getDevices) return null;
-      try {
-        const devs = await navigator.bluetooth.getDevices();
-        if (devs && devs.length > 0) {
-          const obd = devs.find(d => /obd|elm|vgate|viecar|link|konnwei/i.test(d.name || '')) || devs[0];
-          logDebug('Dispositivo previo en Bluefy: ' + (obd.name || obd.id));
-          return obd;
-        }
-      } catch (e) {}
-      return null;
-    }
-
-    async function connectFlow(useFilters = true, isAutoStart = false) {
+    async function connectFlow(useFilters = true) {
       if (isConnecting || isConnected) return;
       isConnecting = true;
       btnConnect.disabled = true;
       btnScanAll.disabled = true;
       try {
-        if (!navigator.bluetooth) {
-          throw new Error('Abre esta página en Bluefy (iOS) o Chrome (PC/Android).');
+        if (!hasWebBluetooth()) {
+          throw new Error('Web Bluetooth no disponible aquí. Abre en Safari (pestaña normal con beacio activo) o Chrome en PC/Android.');
         }
-        const existing = await tryExistingAuthorizedDevice();
-        if (existing) {
-          try {
-            await setupConnectedDevice(existing);
-            return;
-          } catch (e) {
-            logDebug('Reconexión directa falló: ' + formatErr(e));
-            if (isAutoStart) return;
-          }
-        }
-        if (isAutoStart) return;
-
         setStatus('Selecciona <b>OBDII</b> en la ventana de Bluetooth...');
         const options = useFilters
           ? { filters: OBD_FILTERS, optionalServices: BLE_SERVICES }
@@ -966,12 +1168,8 @@
       }
     }
 
-    btnConnect.onclick = () => connectFlow(true, false);
-    btnScanAll.onclick = () => connectFlow(false, false);
-
-    window.addEventListener('load', () => {
-      connectFlow(true, true);
-    });
+    btnConnect.onclick = () => connectFlow(true);
+    btnScanAll.onclick = () => connectFlow(false);
 
     // =========================================================================
     // MOTOR DE MUESTREO DUAL + CÁLCULOS DE INGENIERÍA
@@ -1168,13 +1366,15 @@
             nivel_tanque_pct: fmt(live.fuel_level_pct, 2),
             voltaje_ecu_v: fmt(live.ecu_v, 3),
             tiempo_motor_s: fmt(live.runtime_s, 0),
+            dist_desde_borrado_km: ecuInfo.distCleared,
+            calentamientos: ecuInfo.warmups,
             monitores_emisiones: ecuInfo.readiness,
             dtc_confirmados: ecuInfo.dtcStored,
             dtc_pendientes: ecuInfo.dtcPending
           });
 
           const hz = (records.length / Math.max(0.5, elapsedSec)).toFixed(1);
-          btnDisconnectSave.textContent = `3. Desconectar y Preparar CSV (${records.length})`;
+          btnDisconnectSave.textContent = `3. Desconectar y Guardar (${records.length})`;
           setStatus(`<b>Grabando:</b> ${records.length} filas • ${elapsedSec.toFixed(0)}s (${hz} Hz) • <b>${acState}</b> / <b>${driveMode}</b>`);
 
           if (records.length % 10 === 0) {
@@ -1212,6 +1412,33 @@
       return lines.join('\n');
     }
 
+    btnDownloadCsv.onclick = () => {
+      if (!lastCsvText) return;
+      const blob = new Blob([lastCsvText], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = lastCsvName || 'civic_2008_pro.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+    };
+
+    btnClearCsv.onclick = () => {
+      records = [];
+      lastCsvText = '';
+      lastCsvName = '';
+      el('csvOutputArea').value = '';
+      el('csvBox').style.display = 'none';
+      btnShareLast.disabled = true;
+      btnCopyLast.disabled = true;
+      btnShareLast.textContent = 'Compartir';
+      btnDisconnectSave.textContent = '3. Desconectar y Guardar (0)';
+      try { localStorage.removeItem(BACKUP_KEY); } catch (e) {}
+      setStatus('Sesión limpiada. Listo para una nueva grabación.');
+    };
+
     btnCopyLast.onclick = async () => {
       if (!lastCsvText) return;
       try {
@@ -1239,7 +1466,7 @@
           return;
         } catch (e) {}
       }
-      setStatus('Usa el botón <b>Copiar CSV</b> de al lado para llevarte todos los datos sin bloqueos.');
+      setStatus('Usa <b>Descargar .CSV</b> o <b>Copiar CSV</b>.');
     };
 
     btnDisconnectSave.onclick = async () => {
@@ -1264,7 +1491,7 @@
       btnRecord.textContent = '2. Iniciar Grabación'; btnRecord.style.background = '#10b981';
 
       setStatus(records.length > 0
-        ? `<b>Desconectado (${records.length} filas listas).</b> Pulsa <b>Copiar CSV</b> o <b>Compartir</b>.`
+        ? `<b>Desconectado (${records.length} filas listas).</b> Usa <b>Descargar .CSV</b>, <b>Compartir</b> o <b>Copiar CSV</b>.`
         : '<b>Desconectado.</b> Sin filas grabadas en esta sesión.');
     };
   </script>
