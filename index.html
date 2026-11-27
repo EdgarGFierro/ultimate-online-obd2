@@ -3,51 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Honda Civic 2008 R18 • HDS Pro v4.0</title>
+  <title>Honda Civic 2008 R18 • HDS Pro v5.0</title>
   <style>
     :root {
       --bg: #0b1120; --surface: #151f32; --surface-2: #1e293b; --border: #2e3c54;
       --text: #f8fafc; --muted: #94a3b8; --blue: #2563eb; --cyan: #0ea5e9;
-      --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+      --green: #10b981; --amber: #f59e0b; --red: #ef4444; --purple: #8b5cf6;
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-      background: var(--bg); color: var(--text); margin: 0; padding: 12px 12px 36px;
+      background: var(--bg); color: var(--text); margin: 0; padding: 12px 12px 40px;
     }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
-    .title { font-size: 1.05rem; font-weight: 800; color: #38bdf8; letter-spacing: 0.02em; }
-    .subtitle { font-size: 0.72rem; color: var(--muted); }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 8px; }
+    .title { font-size: 1.02rem; font-weight: 800; color: #38bdf8; letter-spacing: 0.02em; }
+    .subtitle { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+    .pills-col { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
     .pill {
-      font-size: 0.68rem; font-weight: 700; padding: 4px 9px; border-radius: 999px;
+      font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 999px;
       background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 5px;
     }
     .pill.ok { background: rgba(16,185,129,0.15); border-color: var(--green); color: #34d399; }
     .pill.rec { background: rgba(239,68,68,0.2); border-color: var(--red); color: #fca5a5; animation: pulse 1.4s infinite; }
+    .pill.warn { background: rgba(245,158,11,0.16); border-color: var(--amber); color: #fcd34d; }
+    .pill.cyan { background: rgba(14,165,233,0.16); border-color: var(--cyan); color: #7dd3fc; }
     @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+    #keepAwakeVideo {
+      width: 10px; height: 10px; border-radius: 50%; object-fit: cover;
+      background: #0f172a; border: 1px solid var(--border); display: inline-block;
+    }
 
     .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
     button {
       border: none; border-radius: 10px; padding: 12px 10px; font-weight: 700;
-      font-size: 0.85rem; color: #fff; cursor: pointer; transition: transform 0.08s, opacity 0.15s;
+      font-size: 0.84rem; color: #fff; cursor: pointer; transition: transform 0.08s, opacity 0.15s;
     }
     button:active:not(:disabled) { transform: scale(0.98); }
     button:disabled { opacity: 0.35; cursor: not-allowed; }
     #btnConnect { background: var(--blue); }
     #btnRecord { background: var(--green); }
     #btnDisconnectSave { background: var(--red); grid-column: span 2; }
-    .sub-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
-    .btn-sec { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-size: 0.7rem; padding: 8px 4px; }
+    .sub-actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 10px; }
+    .btn-sec { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-size: 0.67rem; padding: 8px 3px; }
 
     .toggles-panel {
       background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-      padding: 10px; margin-bottom: 10px; display: grid; gap: 9px;
+      padding: 10px; margin-bottom: 10px; display: grid; gap: 8px;
     }
-    .toggle-group { display: grid; grid-template-columns: 78px 1fr; align-items: center; gap: 8px; }
-    .toggle-label { font-size: 0.71rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .toggle-group { display: grid; grid-template-columns: 74px 1fr; align-items: center; gap: 8px; }
+    .toggle-label { font-size: 0.69rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
     .seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg); padding: 3px; border-radius: 9px; border: 1px solid var(--border); gap: 4px; }
     .seg button {
-      background: transparent; color: var(--muted); padding: 8px 6px; font-size: 0.82rem;
+      background: transparent; color: var(--muted); padding: 8px 6px; font-size: 0.8rem;
       border-radius: 7px; font-weight: 700;
     }
     .seg button.active-blue { background: var(--blue); color: #fff; }
@@ -55,43 +63,64 @@
     .seg button.active-amber { background: var(--amber); color: #111827; }
     .seg button.active-green { background: var(--green); color: #fff; }
 
+    .markers-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+    .btn-mark {
+      background: #172554; border: 1px solid #1d4ed8; color: #bfdbfe;
+      font-size: 0.67rem; padding: 7px 3px; border-radius: 8px; font-weight: 700;
+    }
+    .btn-mark.hit { background: var(--purple); border-color: #c4b5fd; color: #fff; }
+
     .env-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .note-input {
       width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text);
-      border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; outline: none;
+      border-radius: 8px; padding: 8px 10px; font-size: 0.79rem; outline: none;
     }
     .note-input:focus { border-color: var(--cyan); }
 
     .status-bar {
       background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-      padding: 9px 11px; font-size: 0.77rem; line-height: 1.45; margin-bottom: 10px;
+      padding: 9px 11px; font-size: 0.76rem; line-height: 1.45; margin-bottom: 10px;
     }
     .alert-strip {
-      display: none; border-radius: 9px; padding: 8px 10px; font-size: 0.77rem; font-weight: 600;
+      display: none; border-radius: 9px; padding: 8px 10px; font-size: 0.75rem; font-weight: 600;
       margin-bottom: 10px; background: rgba(245,158,11,0.14); border: 1px solid var(--amber); color: #fcd34d;
     }
+
+    .trip-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px;
+      background: linear-gradient(135deg, #132038, #192942); border: 1px solid #2b456b;
+      border-radius: 10px; padding: 8px 8px; text-align: center;
+    }
+    .trip-strip div span { display: block; font-size: 0.6rem; color: var(--muted); text-transform: uppercase; }
+    .trip-strip div b { font-size: 0.88rem; color: #38bdf8; font-variant-numeric: tabular-nums; }
 
     .csv-box {
       display: none; background: var(--surface); border: 1px solid var(--green);
       border-radius: 10px; padding: 10px; margin-bottom: 10px;
     }
     .csv-box-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
-    .csv-box-title { font-size: 0.76rem; font-weight: 700; color: #34d399; }
+    .csv-box-title { font-size: 0.75rem; font-weight: 700; color: #34d399; }
     .csv-btns { display: flex; gap: 6px; }
-    .csv-btns button { padding: 6px 10px; font-size: 0.72rem; border-radius: 7px; }
+    .csv-btns button { padding: 6px 10px; font-size: 0.71rem; border-radius: 7px; }
     #btnDownloadCsv { background: var(--blue); }
     #btnClearCsv { background: #475569; }
     #csvOutputArea {
-      width: 100%; height: 86px; background: var(--bg); color: #e2e8f0; border: 1px solid var(--border);
-      border-radius: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 0.65rem; padding: 6px;
+      width: 100%; height: 84px; background: var(--bg); color: #e2e8f0; border: 1px solid var(--border);
+      border-radius: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 0.64rem; padding: 6px;
     }
+
+    .ff-box {
+      display: none; background: var(--surface); border: 1px solid var(--purple);
+      border-radius: 10px; padding: 9px 11px; margin-bottom: 10px; font-size: 0.72rem; line-height: 1.45;
+    }
+    .ff-box b { color: #c4b5fd; }
 
     .ecu-meta {
       display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px;
       background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;
-      font-size: 0.72rem;
+      font-size: 0.71rem;
     }
-    .ecu-meta div span { color: var(--muted); display: block; font-size: 0.64rem; text-transform: uppercase; }
+    .ecu-meta div span { color: var(--muted); display: block; font-size: 0.62rem; text-transform: uppercase; }
     .ecu-meta div b { color: var(--text); word-break: break-all; }
 
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
@@ -101,20 +130,21 @@
     }
     .card.warn { border-color: var(--amber); }
     .card.danger { border-color: var(--red); }
-    .label { font-size: 0.67rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.02em; }
-    .val { font-size: 1.2rem; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
-    .unit { font-size: 0.7rem; color: var(--muted); font-weight: 500; }
-    .subval { font-size: 0.68rem; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .card.eco { border-color: var(--green); background: rgba(16,185,129,0.08); }
+    .label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.02em; }
+    .val { font-size: 1.18rem; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .unit { font-size: 0.68rem; color: var(--muted); font-weight: 500; }
+    .subval { font-size: 0.67rem; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
 
     details {
       background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-      padding: 8px 10px; font-size: 0.73rem;
+      padding: 8px 10px; font-size: 0.72rem;
     }
     summary { cursor: pointer; font-weight: 700; color: var(--muted); }
     .term-row { display: grid; grid-template-columns: 1fr auto; gap: 6px; margin-top: 8px; }
     #debugLog {
-      margin-top: 8px; max-height: 220px; overflow-y: auto; font-family: ui-monospace, Menlo, monospace;
-      font-size: 0.66rem; color: #93c5fd; white-space: pre-wrap; word-break: break-all;
+      margin-top: 8px; max-height: 230px; overflow-y: auto; font-family: ui-monospace, Menlo, monospace;
+      font-size: 0.65rem; color: #93c5fd; white-space: pre-wrap; word-break: break-all;
     }
   </style>
 </head>
@@ -122,10 +152,13 @@
 
   <div class="header">
     <div>
-      <div class="title">HONDA CIVIC 2008 • HDS PRO v4.0</div>
-      <div class="subtitle">R18A1 1.8L + 5AT SPCA + GPS + Clima • 60 columnas/fila</div>
+      <div class="title">HONDA CIVIC 2008 • HDS PRO v5.0</div>
+      <div class="subtitle">R18A1 1.8L i-VTEC + 5AT SPCA • Filtro ECM + Auto-Calibrado</div>
     </div>
-    <div id="connPill" class="pill">DESCONECTADO</div>
+    <div class="pills-col">
+      <div id="connPill" class="pill">DESCONECTADO</div>
+      <div id="wakePill" class="pill"><video id="keepAwakeVideo" muted playsinline autoplay></video><span id="wakeText">PANTALLA: AUTO</span></div>
+    </div>
   </div>
 
   <div class="actions">
@@ -136,6 +169,7 @@
 
   <div class="sub-actions">
     <button id="btnWeather" class="btn-sec" type="button">Clima GPS</button>
+    <button id="btnFreezeFrame" class="btn-sec" type="button" disabled>Freeze M02</button>
     <button id="btnScanAll" class="btn-sec" type="button">Buscar Todos</button>
     <button id="btnShareLast" class="btn-sec" disabled>Compartir</button>
     <button id="btnCopyLast" class="btn-sec" disabled>Copiar CSV</button>
@@ -152,6 +186,8 @@
     <textarea id="csvOutputArea" readonly></textarea>
   </div>
 
+  <div class="ff-box" id="ffBox"></div>
+
   <div class="toggles-panel">
     <div class="toggle-group">
       <div class="toggle-label">Aire A/C</div>
@@ -167,21 +203,34 @@
         <button id="btnDrive" type="button">Movimiento</button>
       </div>
     </div>
+    <div class="markers-row">
+      <button class="btn-mark" type="button" data-mark="Arranque_Frio">Frío</button>
+      <button class="btn-mark" type="button" data-mark="Crucero">Crucero</button>
+      <button class="btn-mark" type="button" data-mark="Aceleracion">Acelerón</button>
+      <button class="btn-mark" type="button" data-mark="Falla_Tiron">Falla/Nota</button>
+    </div>
     <div class="env-row">
       <input id="extTempInput" class="note-input" type="number" step="0.5" placeholder="Temp. Ext °C (manual o GPS)" />
       <input id="extHumInput" class="note-input" type="number" step="1" placeholder="Humedad % (opcional)" />
     </div>
-    <input id="sessionNote" class="note-input" type="text" placeholder="Nota opcional (ej: EVAP tapada, bujías nuevas, clima caluroso...)" />
+    <input id="sessionNote" class="note-input" type="text" placeholder="Nota opcional (ej: gasolina Magna, bujías nuevas, ciudad...)" />
   </div>
 
   <div class="status-bar" id="statusBar">
-    Enciende el motor del Civic, cierra Car Scanner y pulsa <b>1. Conectar OBDII</b>.
+    Enciende el motor del Civic y pulsa <b>1. Conectar OBDII</b>. Desactiva el <i>Modo Ahorro de Batería</i> para mantener la pantalla siempre activa.
   </div>
 
   <div class="alert-strip" id="alertStrip"></div>
 
+  <div class="trip-strip">
+    <div><span>Distancia</span><b id="t_dist">0.00 km</b></div>
+    <div><span>Gasolina</span><b id="t_fuel">0.000 L</b></div>
+    <div><span>Prom. Viaje</span><b id="t_kml">-- km/L</b></div>
+    <div><span>i-VTEC / DFCO</span><b id="t_mode">Normal</b></div>
+  </div>
+
   <div class="ecu-meta">
-    <div><span>Chip / Voltaje Bat.</span><b id="m_chip">--</b></div>
+    <div><span>Chip / Bat / Filtro</span><b id="m_chip">--</b></div>
     <div><span>Protocolo / Modo</span><b id="m_proto">--</b></div>
     <div><span>VIN Detectado</span><b id="m_vin">--</b></div>
     <div><span>Monitores Emisiones</span><b id="m_readiness">--</b></div>
@@ -205,12 +254,12 @@
       <div class="val"><span id="v_gear">--</span> <span class="unit">marcha</span></div>
       <div class="subval">Slip Conv: <span id="v_slip">--</span>% • Acel: <span id="v_acel">--</span> m/s²</div>
     </div>
-    <div class="card">
+    <div class="card" id="card_map">
       <div class="label">MAP / Vacío Múltiple</div>
       <div class="val"><span id="v_map">--</span> <span class="unit">kPa</span></div>
       <div class="subval">Vacío: <span id="v_vac">--</span> inHg • Baro: <span id="v_baro">--</span></div>
     </div>
-    <div class="card">
+    <div class="card" id="card_maf">
       <div class="label">MAF / Eficiencia Vol.</div>
       <div class="val"><span id="v_maf">--</span> <span class="unit">g/s</span></div>
       <div class="subval">VE R18: <span id="v_ve">--</span>% • Carga: <span id="v_load">--</span>%</div>
@@ -225,13 +274,13 @@
       <div class="val"><span id="v_o2s2">--</span> <span class="unit">V</span></div>
       <div class="subval">STFT S2: <span id="v_o2s2t">--</span>% • Cat: <span id="v_cat">--</span>°C</div>
     </div>
-    <div class="card">
+    <div class="card" id="card_ect">
       <div class="label">Térmica ECT / IAT</div>
       <div class="val"><span id="v_ect">--</span> <span class="unit">°C</span></div>
       <div class="subval">IAT: <span id="v_iat">--</span>°C • ΔExt: <span id="v_delta_iat">--</span>°C</div>
     </div>
     <div class="card">
-      <div class="label">Consumo / Pendiente</div>
+      <div class="label">Consumo Inst. / Pend.</div>
       <div class="val"><span id="v_lh">--</span> <span class="unit">L/h</span></div>
       <div class="subval"><span id="v_kml">--</span> km/L • Pend: <span id="v_slope">--</span>%</div>
     </div>
@@ -246,16 +295,16 @@
       <div class="subval">TPS: <span id="v_tps">--</span>% • EGR: <span id="v_egr">--</span>%</div>
     </div>
     <div class="card">
-      <div class="label">EVAP Vapor / Bucle</div>
-      <div class="val"><span id="v_evapp">--</span> <span class="unit">Pa</span></div>
-      <div class="subval">Rel: <span id="v_rtps">--</span>% • <span id="m_loop">--</span></div>
+      <div class="label">Bucle / Ciclo Activo</div>
+      <div class="val" style="font-size:0.95rem;"><span id="m_loop">--</span></div>
+      <div class="subval">Rel: <span id="v_rtps">--</span>% • EVAP Pa: <span id="v_evapp">--</span></div>
     </div>
   </div>
 
   <details open>
     <summary>Consola Técnica ELM327 y Terminal Manual</summary>
     <div class="term-row">
-      <input id="manualCmdInput" class="note-input" type="text" placeholder="Comando manual (ej: ATI, ATRV, 0100, 010C)" />
+      <input id="manualCmdInput" class="note-input" type="text" placeholder="Comando manual (ej: ATI, ATRV, 010B, 0110, 020200)" />
       <button id="btnSendManual" class="btn-sec" type="button" style="padding: 8px 12px;">Enviar</button>
     </div>
     <div id="debugLog">Listo. Abre en Safari (pestaña normal con beacio activo) o Chrome.</div>
@@ -263,45 +312,15 @@
 
   <script>
     // =========================================================================
-    // HONDA CIVIC 2008 R18A1 + SPCA 5AT - PRO TELEMETRY LOGGER v4.0
+    // HONDA CIVIC 2008 R18A1 + SPCA 5AT - PRO TELEMETRY SCANNER v5.0
     // =========================================================================
     const KNOWN_UART_PROFILES = [
-      {
-        name: 'FFF0 (ELM327 BLE Estándar)',
-        service: '0000fff0-0000-1000-8000-00805f9b34fb',
-        rx: '0000fff1-0000-1000-8000-00805f9b34fb',
-        tx: '0000fff2-0000-1000-8000-00805f9b34fb'
-      },
-      {
-        name: '18F0 (Vgate / Viecar / OBDII)',
-        service: '000018f0-0000-1000-8000-00805f9b34fb',
-        rx: '00002af0-0000-1000-8000-00805f9b34fb',
-        tx: '00002af1-0000-1000-8000-00805f9b34fb'
-      },
-      {
-        name: 'FFE0 (HM-10 / CC2541)',
-        service: '0000ffe0-0000-1000-8000-00805f9b34fb',
-        rx: '0000ffe1-0000-1000-8000-00805f9b34fb',
-        tx: '0000ffe1-0000-1000-8000-00805f9b34fb'
-      },
-      {
-        name: 'ISSC / Microchip Transparent UART',
-        service: '49535343-fe7d-4ae5-8fa9-9fafd205e455',
-        rx: '49535343-1e4d-4bd9-ba61-23c647249616',
-        tx: '49535343-8841-43f4-a8d4-ecbe34729bb3'
-      },
-      {
-        name: 'Nordic UART Service (NUS)',
-        service: '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
-        rx: '6e400003-b5a3-f393-e0a9-e50e24dcca9e',
-        tx: '6e400002-b5a3-f393-e0a9-e50e24dcca9e'
-      },
-      {
-        name: 'Dual-Mode E781',
-        service: 'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
-        rx: 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f',
-        tx: 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f'
-      }
+      { name: 'FFF0 (ELM327 BLE)', service: '0000fff0-0000-1000-8000-00805f9b34fb', rx: '0000fff1-0000-1000-8000-00805f9b34fb', tx: '0000fff2-0000-1000-8000-00805f9b34fb' },
+      { name: '18F0 (Vgate/Viecar)', service: '000018f0-0000-1000-8000-00805f9b34fb', rx: '00002af0-0000-1000-8000-00805f9b34fb', tx: '00002af1-0000-1000-8000-00805f9b34fb' },
+      { name: 'FFE0 (HM-10/CC2541)', service: '0000ffe0-0000-1000-8000-00805f9b34fb', rx: '0000ffe1-0000-1000-8000-00805f9b34fb', tx: '0000ffe1-0000-1000-8000-00805f9b34fb' },
+      { name: 'ISSC Transparent UART', service: '49535343-fe7d-4ae5-8fa9-9fafd205e455', rx: '49535343-1e4d-4bd9-ba61-23c647249616', tx: '49535343-8841-43f4-a8d4-ecbe34729bb3' },
+      { name: 'Nordic UART (NUS)', service: '6e400001-b5a3-f393-e0a9-e50e24dcca9e', rx: '6e400003-b5a3-f393-e0a9-e50e24dcca9e', tx: '6e400002-b5a3-f393-e0a9-e50e24dcca9e' },
+      { name: 'Dual-Mode E781', service: 'e7810a71-73ae-499d-8c15-faa9aef0c3f2', rx: 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f', tx: 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f' }
     ];
 
     const BLE_SERVICES = [
@@ -325,13 +344,11 @@
 
     const SKIP_SERVICES = new Set([
       '1800', '1801', '180a', '180f',
-      '00001800-0000-1000-8000-00805f9b34fb',
-      '00001801-0000-1000-8000-00805f9b34fb',
-      '0000180a-0000-1000-8000-00805f9b34fb',
-      '0000180f-0000-1000-8000-00805f9b34fb'
+      '00001800-0000-1000-8000-00805f9b34fb', '00001801-0000-1000-8000-00805f9b34fb',
+      '0000180a-0000-1000-8000-00805f9b34fb', '0000180f-0000-1000-8000-00805f9b34fb'
     ]);
 
-    const BACKUP_KEY = 'honda_civic_2008_hds_backup_v40';
+    const BACKUP_KEY = 'honda_civic_2008_hds_backup_v50';
     const R18_DISPLACEMENT_L = 1.799;
 
     const HONDA_5AT_RATIOS = [
@@ -348,24 +365,29 @@
     let rxBuffer = '', resolvePrompt = null;
     let cmdQueue = Promise.resolve();
 
-    let isConnected = false, isConnecting = false, isRecording = false, useMultiPid = false;
+    let isConnected = false, isConnecting = false, isRecording = false;
     let isCanProtocol = true;
+    let canRespSuffix = '';
+    let ecmLockedId = '';
+    let multiPidSupport = { pair6: false, pair7: false };
     let supportedPids = new Set();
-    let fastPidList = [], slowPidList = [];
+    let fastSubCycles = [], slowBatches = [];
     let records = [];
     let lastCsvText = '', lastCsvName = '';
-    let wakeLockObj = null, keepAliveAudioCtx = null;
 
+    // Keep-awake dual (Native WakeLock + Canvas Live Stream Video)
+    let wakeLockObj = null;
+    let keepAwakeCanvas = null, keepAwakeTimer = null, keepAwakeVideoActive = false;
+
+    // GPS y Clima
     let gpsWatchId = null;
-    const gpsState = {
-      speedKmh: '', altM: '', lat: '', lon: '', slopePct: '',
-      prevAltM: null, prevLat: null, prevLon: null
-    };
+    const gpsState = { speedKmh: '', altM: '', lat: '', lon: '', slopePct: '', prevAltM: null, prevLat: null, prevLon: null };
     const envState = { extTempC: '', extHumPct: '', extPressHpa: '', source: 'Sin_dato' };
 
-    let prevSpdKmh = null, prevTimeSec = null;
-    let acState = 'Sin_AC';
-    let driveMode = 'Ralenti';
+    // Estado de sesión e integrador de viaje
+    let prevSpdKmh = null, prevTimeSec = null, lastWallMs = null;
+    let acState = 'Sin_AC', driveMode = 'Ralenti', pendingEventTag = '';
+    const trip = { distKm: 0, fuelL: 0, idleSec: 0, acSec: 0, ecoSec: 0, dfcoSec: 0 };
 
     const ecuInfo = {
       elmVer: '--', batV: '--', proto: '--', vin: 'No_disponible',
@@ -381,7 +403,8 @@
       egr_cmd_pct: '', egr_err_pct: '', evap_purge_pct: '', fuel_level_pct: '',
       evap_vapor_pa: '', baro_kpa: '', o2s1_lambda: '', o2s1_afr: '', o2s1_ma: '',
       cat_temp_c: '', ecu_v: '', abs_load_pct: '', cmd_lambda: '', cmd_afr: '',
-      tps_rel_pct: '', amb_obd_c: '', tps_b_pct: '', pedal_d_pct: '', pedal_e_pct: '', cvr_pct: ''
+      tps_rel_pct: '', amb_obd_c: '', tps_b_pct: '', pedal_d_pct: '', pedal_e_pct: '', cvr_pct: '',
+      par_activo: ''
     };
 
     const el = (id) => document.getElementById(id);
@@ -389,17 +412,22 @@
     const btnScanAll = el('btnScanAll');
     const btnRecord = el('btnRecord');
     const btnDisconnectSave = el('btnDisconnectSave');
+    const btnFreezeFrame = el('btnFreezeFrame');
     const btnShareLast = el('btnShareLast');
     const btnCopyLast = el('btnCopyLast');
     const btnDownloadCsv = el('btnDownloadCsv');
     const btnClearCsv = el('btnClearCsv');
     const btnWeather = el('btnWeather');
     const connPill = el('connPill');
+    const wakePill = el('wakePill');
+    const wakeText = el('wakeText');
+    const keepAwakeVideo = el('keepAwakeVideo');
     const statusBar = el('statusBar');
     const alertStrip = el('alertStrip');
     const debugLog = el('debugLog');
 
     const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const numOrNaN = (v) => (v === '' || v === null || v === undefined) ? NaN : Number(v);
     const normUuid = (u) => {
       const s = String(u || '').toLowerCase().trim();
       return s.length === 4 ? `0000${s}-0000-1000-8000-00805f9b34fb` : s;
@@ -419,7 +447,7 @@
 
     function logDebug(msg) {
       const t = new Date().toTimeString().slice(0, 8);
-      debugLog.textContent = `[${t}] ${msg}\n` + debugLog.textContent.slice(0, 6000);
+      debugLog.textContent = `[${t}] ${msg}\n` + debugLog.textContent.slice(0, 7000);
     }
     function setStatus(html) { statusBar.innerHTML = html; }
 
@@ -428,13 +456,17 @@
     el('btnIdle').onclick = () => { driveMode = 'Ralenti'; el('btnIdle').className = 'active-blue'; el('btnDrive').className = ''; };
     el('btnDrive').onclick = () => { driveMode = 'Movimiento'; el('btnIdle').className = ''; el('btnDrive').className = 'active-amber'; };
 
-    el('extTempInput').addEventListener('input', () => {
-      envState.extTempC = el('extTempInput').value;
-      envState.source = 'Manual';
+    document.querySelectorAll('.btn-mark').forEach(btn => {
+      btn.addEventListener('click', () => {
+        pendingEventTag = btn.dataset.mark;
+        btn.classList.add('hit');
+        setTimeout(() => btn.classList.remove('hit'), 800);
+        logDebug('Marca rápida registrada: ' + pendingEventTag);
+      });
     });
-    el('extHumInput').addEventListener('input', () => {
-      envState.extHumPct = el('extHumInput').value;
-    });
+
+    el('extTempInput').addEventListener('input', () => { envState.extTempC = el('extTempInput').value; envState.source = 'Manual'; });
+    el('extHumInput').addEventListener('input', () => { envState.extHumPct = el('extHumInput').value; });
 
     function showCsvReady(csvText, fileName, rowCount) {
       lastCsvText = csvText;
@@ -445,6 +477,12 @@
       el('csvBox').style.display = 'block';
       el('csvBoxTitle').textContent = `CSV listo (${rowCount} filas)`;
       el('csvOutputArea').value = csvText;
+    }
+
+    function saveBackupNow() {
+      if (records.length > 0) {
+        try { localStorage.setItem(BACKUP_KEY, JSON.stringify(records)); } catch (e) {}
+      }
     }
 
     (function checkBackup() {
@@ -460,14 +498,101 @@
     })();
 
     // =========================================================================
+    // DOBLE KEEP-AWAKE PARA iOS SAFARI (Native WakeLock + Canvas Live Stream)
+    // =========================================================================
+    function updateWakeBadge() {
+      if (wakeLockObj) {
+        wakePill.className = 'pill ok';
+        wakeText.textContent = keepAwakeVideoActive ? 'PANTALLA: FIJA x2' : 'PANTALLA: FIJA';
+      } else if (keepAwakeVideoActive) {
+        wakePill.className = 'pill cyan';
+        wakeText.textContent = 'PANTALLA: VIDEO';
+      } else if (isRecording) {
+        wakePill.className = 'pill warn';
+        wakeText.textContent = 'PANTALLA: SIN LOCK';
+      } else {
+        wakePill.className = 'pill';
+        wakeText.textContent = 'PANTALLA: AUTO';
+      }
+    }
+
+    function startLiveKeepAwakeVideo() {
+      try {
+        if (!keepAwakeCanvas) {
+          keepAwakeCanvas = document.createElement('canvas');
+          keepAwakeCanvas.width = 16;
+          keepAwakeCanvas.height = 16;
+        }
+        const ctx = keepAwakeCanvas.getContext('2d');
+        let tick = 0;
+        const drawPulse = () => {
+          tick++;
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(0, 0, 16, 16);
+          ctx.fillStyle = (tick % 2 === 0) ? '#10b981' : '#38bdf8';
+          ctx.beginPath();
+          ctx.arc(8, 8, 5, 0, Math.PI * 2);
+          ctx.fill();
+        };
+        drawPulse();
+        if (!keepAwakeTimer) keepAwakeTimer = setInterval(drawPulse, 1000);
+        if (typeof keepAwakeCanvas.captureStream === 'function') {
+          if (!keepAwakeVideo.srcObject) keepAwakeVideo.srcObject = keepAwakeCanvas.captureStream(2);
+          const p = keepAwakeVideo.play();
+          if (p && p.then) {
+            p.then(() => { keepAwakeVideoActive = true; updateWakeBadge(); }).catch(() => {});
+          }
+        }
+      } catch (e) {}
+    }
+
+    function stopLiveKeepAwakeVideo() {
+      if (keepAwakeTimer) { clearInterval(keepAwakeTimer); keepAwakeTimer = null; }
+      try { keepAwakeVideo.pause(); } catch (e) {}
+      keepAwakeVideoActive = false;
+      updateWakeBadge();
+    }
+
+    async function enableWakeLock() {
+      if ('wakeLock' in navigator && !wakeLockObj) {
+        try {
+          wakeLockObj = await navigator.wakeLock.request('screen');
+          wakeLockObj.addEventListener('release', () => {
+            wakeLockObj = null;
+            updateWakeBadge();
+          });
+          logDebug('WakeLock nativo activado.');
+        } catch (e) {
+          logDebug('WakeLock nativo no disponible: ' + formatErr(e));
+        }
+      }
+      startLiveKeepAwakeVideo();
+      updateWakeBadge();
+    }
+
+    async function disableWakeLock() {
+      try { if (wakeLockObj) { await wakeLockObj.release(); wakeLockObj = null; } } catch (e) {}
+      stopLiveKeepAwakeVideo();
+      updateWakeBadge();
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') saveBackupNow();
+      else if (document.visibilityState === 'visible' && isRecording) enableWakeLock();
+    });
+    window.addEventListener('pagehide', saveBackupNow);
+    document.addEventListener('pointerdown', () => {
+      if (isRecording && !wakeLockObj) enableWakeLock();
+    }, { passive: true });
+
+    // =========================================================================
     // CLIMA EXTERIOR AUTOMÁTICO + GPS EN VIVO
     // =========================================================================
     function haversineMeters(lat1, lon1, lat2, lon2) {
       const R = 6371000;
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat / 2) ** 2 +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
       return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
@@ -476,11 +601,8 @@
       try {
         gpsWatchId = navigator.geolocation.watchPosition((pos) => {
           const c = pos.coords;
-          gpsState.lat = c.latitude;
-          gpsState.lon = c.longitude;
-          if (c.speed !== null && !Number.isNaN(c.speed)) {
-            gpsState.speedKmh = Math.max(0, c.speed * 3.6);
-          }
+          gpsState.lat = c.latitude; gpsState.lon = c.longitude;
+          if (c.speed !== null && !Number.isNaN(c.speed)) gpsState.speedKmh = Math.max(0, c.speed * 3.6);
           if (c.altitude !== null && !Number.isNaN(c.altitude)) {
             gpsState.altM = c.altitude;
             if (gpsState.prevLat !== null && gpsState.prevAltM !== null) {
@@ -488,14 +610,10 @@
               if (distM >= 15) {
                 const rawSlope = ((c.altitude - gpsState.prevAltM) / distM) * 100;
                 if (Math.abs(rawSlope) <= 25) gpsState.slopePct = rawSlope;
-                gpsState.prevAltM = c.altitude;
-                gpsState.prevLat = c.latitude;
-                gpsState.prevLon = c.longitude;
+                gpsState.prevAltM = c.altitude; gpsState.prevLat = c.latitude; gpsState.prevLon = c.longitude;
               }
             } else {
-              gpsState.prevAltM = c.altitude;
-              gpsState.prevLat = c.latitude;
-              gpsState.prevLon = c.longitude;
+              gpsState.prevAltM = c.altitude; gpsState.prevLat = c.latitude; gpsState.prevLon = c.longitude;
             }
           }
         }, () => {}, { enableHighAccuracy: true, maximumAge: 1500, timeout: 5000 });
@@ -525,40 +643,12 @@
             envState.source = 'OpenMeteo_GPS';
             el('extTempInput').value = envState.extTempC;
             el('extHumInput').value = envState.extHumPct;
-            btnWeather.textContent = `${envState.extTempC}°C / ${envState.extHumPct}%`;
+            btnWeather.textContent = `${envState.extTempC}°C`;
             setStatus(`<b>Clima cargado:</b> ${envState.extTempC} °C, humedad ${envState.extHumPct}%.`);
           }
-        } catch (e) {
-          btnWeather.textContent = 'Sin Red';
-        }
-      }, () => { btnWeather.textContent = 'GPS Negado'; }, { enableHighAccuracy: true, timeout: 8000 });
+        } catch (e) { btnWeather.textContent = 'Sin Red'; }
+      }, () => { btnWeather.textContent = 'Sin GPS'; }, { enableHighAccuracy: true, timeout: 8000 });
     };
-
-    // =========================================================================
-    // WAKE LOCK (Pantalla activa mientras graba)
-    // =========================================================================
-    async function enableWakeLock() {
-      if ('wakeLock' in navigator) {
-        try { wakeLockObj = await navigator.wakeLock.request('screen'); } catch (e) {}
-      }
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (AudioCtx && !keepAliveAudioCtx) {
-          keepAliveAudioCtx = new AudioCtx();
-          const osc = keepAliveAudioCtx.createOscillator();
-          const gain = keepAliveAudioCtx.createGain();
-          gain.gain.value = 0.0001;
-          osc.connect(gain);
-          gain.connect(keepAliveAudioCtx.destination);
-          osc.start();
-        }
-      } catch (e) {}
-    }
-
-    async function disableWakeLock() {
-      try { if (wakeLockObj) { await wakeLockObj.release(); wakeLockObj = null; } } catch (e) {}
-      try { if (keepAliveAudioCtx) { await keepAliveAudioCtx.close(); keepAliveAudioCtx = null; } } catch (e) {}
-    }
 
     // =========================================================================
     // MOTOR BLE: DECODIFICACIÓN SEGURA, COLA SECUENCIAL Y AUTO-SONDEO UART
@@ -567,9 +657,7 @@
       if (!val) return '';
       if (typeof val === 'string') return val;
       try {
-        if (val instanceof ArrayBuffer) {
-          return new TextDecoder().decode(new Uint8Array(val));
-        }
+        if (val instanceof ArrayBuffer) return new TextDecoder().decode(new Uint8Array(val));
         if (val.buffer && typeof val.byteOffset === 'number' && typeof val.byteLength === 'number') {
           return new TextDecoder().decode(new Uint8Array(val.buffer, val.byteOffset, val.byteLength));
         }
@@ -579,9 +667,7 @@
           let out = '';
           for (let i = 0; i < val.byteLength; i++) out += String.fromCharCode(val.getUint8(i));
           return out;
-        } catch (e2) {
-          return '';
-        }
+        } catch (e2) { return ''; }
       }
     }
 
@@ -619,7 +705,6 @@
         if (canWNR) tryList.push('without');
         if (hasLegacy) tryList.push('legacy');
       }
-
       if (tryList.length === 0) {
         if (typeof charObj.writeValueWithResponse === 'function') tryList.push('with');
         if (typeof charObj.writeValueWithoutResponse === 'function') tryList.push('without');
@@ -636,9 +721,7 @@
             else await charObj.writeValue(slice);
           }
           return mode;
-        } catch (e) {
-          lastErr = e;
-        }
+        } catch (e) { lastErr = e; }
       }
       if (lastErr) throw lastErr;
       return preferredMode;
@@ -653,31 +736,18 @@
         const finish = async (rawOut) => {
           if (drainMs > 0) {
             await sleep(drainMs);
-            if (rxBuffer) {
-              rawOut += rxBuffer;
-              rxBuffer = '';
-            }
+            if (rxBuffer) { rawOut += rxBuffer; rxBuffer = ''; }
           }
           resolve(rawOut);
         };
 
-        const timer = setTimeout(() => {
-          resolvePrompt = null;
-          finish(rxBuffer);
-        }, timeoutMs);
-
-        resolvePrompt = (data) => {
-          clearTimeout(timer);
-          finish(data);
-        };
+        const timer = setTimeout(() => { resolvePrompt = null; finish(rxBuffer); }, timeoutMs);
+        resolvePrompt = (data) => { clearTimeout(timer); finish(data); };
 
         const term = forceTerm !== null ? forceTerm : cmdTerminator;
         const bytes = new TextEncoder().encode(cmd + term);
-        try {
-          await writeBytesToChar(txChar, bytes, forceMode || txWriteMode);
-        } catch (e) {
-          logDebug(`Write err (${cmd}): ${formatErr(e)}`);
-        }
+        try { await writeBytesToChar(txChar, bytes, forceMode || txWriteMode); }
+        catch (e) { logDebug(`Write err (${cmd}): ${formatErr(e)}`); }
       });
     }
 
@@ -698,12 +768,9 @@
 
     async function attachAndProbePair(candidate) {
       const { rx, tx, label } = candidate;
-      const rxId = normUuid(rx.uuid).slice(4, 8);
-      const txId = normUuid(tx.uuid).slice(4, 8);
+      const rxId = normUuid(rx.uuid).slice(4, 8), txId = normUuid(tx.uuid).slice(4, 8);
       logDebug(`Probando UART ${label} (RX:${rxId} TX:${txId})...`);
-
-      rxChar = rx;
-      txChar = tx;
+      rxChar = rx; txChar = tx;
 
       if (rxChar.addEventListener) {
         rxChar.removeEventListener('characteristicvaluechanged', onNotify);
@@ -712,28 +779,20 @@
         rxChar.oncharacteristicvaluechanged = onNotify;
       }
 
-      try {
-        await rxChar.startNotifications();
-      } catch (e) {
-        logDebug(`  startNotifications falló: ${formatErr(e)}`);
-        return false;
-      }
+      try { await rxChar.startNotifications(); }
+      catch (e) { logDebug(`  startNotifications falló: ${formatErr(e)}`); return false; }
       await sleep(160);
 
       const attempts = [
-        { mode: 'without', term: '\r' },
-        { mode: 'with', term: '\r' },
-        { mode: 'legacy', term: '\r' },
-        { mode: 'without', term: '\r\n' }
+        { mode: 'without', term: '\r' }, { mode: 'with', term: '\r' },
+        { mode: 'legacy', term: '\r' }, { mode: 'without', term: '\r\n' }
       ];
-
       for (const att of attempts) {
         const resp = await sendCmdRaw('ATI', 950, 80, att.mode, att.term);
         const cleaned = resp.replace(/[\r\n\x00]+/g, ' ').trim();
         if (cleaned.length > 0) {
-          txWriteMode = att.mode;
-          cmdTerminator = att.term;
-          logDebug(`  ✓ RESPUESTA en ${label} [${att.mode}]: "${cleaned.slice(0, 60)}"`);
+          txWriteMode = att.mode; cmdTerminator = att.term;
+          logDebug(`  ✓ RESPUESTA ${label} [${att.mode}]: "${cleaned.slice(0, 50)}"`);
           return true;
         }
       }
@@ -745,49 +804,31 @@
 
     async function discoverAndLockUart(server) {
       const servicesMap = new Map();
-
       if (server.getPrimaryServices) {
-        try {
-          const allSrvs = await server.getPrimaryServices();
-          for (const s of allSrvs) servicesMap.set(normUuid(s.uuid), s);
-        } catch (e) {
-          logDebug('getPrimaryServices aviso: ' + formatErr(e));
-        }
+        try { for (const s of await server.getPrimaryServices()) servicesMap.set(normUuid(s.uuid), s); }
+        catch (e) { logDebug('getPrimaryServices aviso: ' + formatErr(e)); }
       }
       for (const uuid of BLE_SERVICES) {
         if (!servicesMap.has(uuid)) {
-          try {
-            const s = await server.getPrimaryService(uuid);
-            if (s) servicesMap.set(normUuid(s.uuid), s);
-          } catch (e) {}
+          try { const s = await server.getPrimaryService(uuid); if (s) servicesMap.set(normUuid(s.uuid), s); } catch (e) {}
         }
       }
-
       logDebug(`Servicios BLE (${servicesMap.size}): ` + [...servicesMap.keys()].map(u => u.slice(4, 8)).join(', '));
 
-      const candidates = [];
-      const seenKeys = new Set();
-
-      // 1. Prioridad máxima: perfiles UART OBD-II exactos conocidos
+      const candidates = [], seenKeys = new Set();
       for (const prof of KNOWN_UART_PROFILES) {
         const srv = servicesMap.get(prof.service);
         if (!srv) continue;
         try {
           const chars = await srv.getCharacteristics();
           const byId = new Map(chars.map(c => [normUuid(c.uuid), c]));
-          const rx = byId.get(prof.rx);
-          const tx = byId.get(prof.tx);
+          const rx = byId.get(prof.rx), tx = byId.get(prof.tx);
           if (rx && tx) {
             const key = `${normUuid(rx.uuid)}|${normUuid(tx.uuid)}`;
-            if (!seenKeys.has(key)) {
-              seenKeys.add(key);
-              candidates.push({ rx, tx, label: prof.name });
-            }
+            if (!seenKeys.has(key)) { seenKeys.add(key); candidates.push({ rx, tx, label: prof.name }); }
           }
         } catch (e) {}
       }
-
-      // 2. Respaldo genérico: cualquier combinación Notify + Write en servicios no estándar
       for (const [suuid, srv] of servicesMap.entries()) {
         if (SKIP_SERVICES.has(suuid)) continue;
         let chars = [];
@@ -795,40 +836,38 @@
         const rxList = [], txList = [];
         for (const c of chars) {
           const p = c.properties || {};
-          logDebug(`  Srv ${suuid.slice(4, 8)} Char ${normUuid(c.uuid).slice(4, 8)} [N:${!!p.notify} I:${!!p.indicate} W:${!!p.write} WNR:${!!p.writeWithoutResponse}]`);
           if (p.notify || p.indicate) rxList.push(c);
           if (p.write || p.writeWithoutResponse) txList.push(c);
         }
-        for (const rx of rxList) {
-          for (const tx of txList) {
-            const key = `${normUuid(rx.uuid)}|${normUuid(tx.uuid)}`;
-            if (!seenKeys.has(key)) {
-              seenKeys.add(key);
-              candidates.push({ rx, tx, label: `Genérico ${suuid.slice(4, 8)}` });
-            }
-          }
+        for (const rx of rxList) for (const tx of txList) {
+          const key = `${normUuid(rx.uuid)}|${normUuid(tx.uuid)}`;
+          if (!seenKeys.has(key)) { seenKeys.add(key); candidates.push({ rx, tx, label: `Genérico ${suuid.slice(4, 8)}` }); }
         }
       }
-
-      if (candidates.length === 0) {
-        throw new Error('No se encontraron canales BLE UART en este dispositivo.');
-      }
-
-      for (const cand of candidates) {
-        const ok = await attachAndProbePair(cand);
-        if (ok) return cand;
-      }
-
-      throw new Error('Bluetooth enlazado, pero el chip ELM327 no respondió a ATI en ningún canal. Desconecta y reconecta el adaptador del puerto OBD-II.');
+      if (!candidates.length) throw new Error('No se encontraron canales BLE UART.');
+      for (const cand of candidates) { if (await attachAndProbePair(cand)) return cand; }
+      throw new Error('Bluetooth enlazado, pero el ELM327 no respondió a ATI.');
     }
 
     // =========================================================================
-    // REENSAMBLADO ISO-TP Y DECODIFICADORES OBD-II
+    // REENSAMBLADO ISO-TP, FILTRO DE CABECERA ECM Y DECODIFICADORES OBD-II
     // =========================================================================
+    function extractCanHeaders(raw) {
+      const headers = [];
+      const lines = (raw || '').replace(/SEARCHING\.*/gi, '\n').split(/[\r\n]+/);
+      for (const ln of lines) {
+        const h = ln.toUpperCase().replace(/[^0-9A-F]/g, '');
+        const m29 = h.match(/^(18DAF1[0-9A-F]{2})/);
+        if (m29 && !headers.includes(m29[1])) headers.push(m29[1]);
+        const m11 = h.match(/^(7E[8-F])/);
+        if (m11 && !headers.includes(m11[1])) headers.push(m11[1]);
+      }
+      return headers;
+    }
+
     function reassemblePayload(raw, modeReply = '41') {
       if (!raw) return '';
-      const unsearched = raw.replace(/SEARCHING\.*/gi, '\n');
-      const lines = unsearched.split(/[\r\n]+/).map(l => l.trim()).filter(Boolean);
+      const lines = raw.replace(/SEARCHING\.*/gi, '\n').split(/[\r\n]+/).map(l => l.trim()).filter(Boolean);
       const clean = [];
       for (const ln of lines) {
         const up = ln.toUpperCase().replace(/>/g, '').trim();
@@ -871,13 +910,17 @@
         return pos !== -1 ? joined.slice(pos + modeReply.length) : '';
       }
 
+      let best = '';
       for (const ln of clean) {
         const hex = ln.replace(/[^0-9A-F]/g, '');
         if (hex.length <= 6 && hex.startsWith('01') && modeReply.startsWith('41')) continue;
         const pos = hex.indexOf(modeReply);
-        if (pos !== -1) return hex.slice(pos + modeReply.length);
+        if (pos !== -1) {
+          const cand = hex.slice(pos + modeReply.length);
+          if (cand.length > best.length) best = cand;
+        }
       }
-      return '';
+      return best;
     }
 
     const FUEL_SYS_MAP = {
@@ -891,20 +934,28 @@
       if ((b & 0x02) && (b & 0x20)) inc.push('Fuel');
       if ((b & 0x04) && (b & 0x40)) inc.push('Comp');
       const sparkMap = [[0,'Cat'],[2,'EVAP'],[5,'O2'],[6,'O2Heat'],[7,'EGR']];
-      for (const [bit, name] of sparkMap) {
-        if ((c & (1 << bit)) && (d & (1 << bit))) inc.push(name);
-      }
+      for (const [bit, name] of sparkMap) { if ((c & (1 << bit)) && (d & (1 << bit))) inc.push(name); }
       return inc.length ? 'Pend:' + inc.join('|') : 'Todos_OK';
     }
 
-    function parseBitmask(hex8, baseOffset) {
-      if (hex8.length < 8) return;
-      const val = parseInt(hex8.slice(0, 8), 16) >>> 0;
-      for (let bit = 0; bit < 32; bit++) {
-        if (val & (1 << (31 - bit))) {
-          supportedPids.add((baseOffset + bit + 1).toString(16).toUpperCase().padStart(2, '0'));
+    function parseBitmaskFromRaw(raw, modeReply, baseOffset) {
+      const lines = (raw || '').replace(/SEARCHING\.*/gi, '\n').split(/[\r\n]+/);
+      let added = 0;
+      for (const ln of lines) {
+        const hex = ln.toUpperCase().replace(/[^0-9A-F]/g, '');
+        const pos = hex.indexOf(modeReply);
+        if (pos === -1) continue;
+        const maskHex = hex.slice(pos + modeReply.length, pos + modeReply.length + 8);
+        if (maskHex.length < 8) continue;
+        const val = parseInt(maskHex, 16) >>> 0;
+        for (let bit = 0; bit < 32; bit++) {
+          if (val & (1 << (31 - bit))) {
+            supportedPids.add((baseOffset + bit + 1).toString(16).toUpperCase().padStart(2, '0'));
+            added++;
+          }
         }
       }
+      return added;
     }
 
     function parseMode01Payload(stream, expectedSinglePid = null) {
@@ -945,6 +996,12 @@
         }
         else if (pid === '1F' && i + 4 <= stream.length) out.runtime_s = u16();
         else if (pid === '21' && i + 4 <= stream.length) ecuInfo.distMil = u16();
+        else if (pid === '24' && i + 8 <= stream.length) {
+          const lam = u16() / 32768;
+          u16();
+          out.o2s1_lambda = lam;
+          out.o2s1_afr = lam * 14.7;
+        }
         else if (pid === '2C' && i + 2 <= stream.length) out.egr_cmd_pct = (u8() * 100) / 255;
         else if (pid === '2D' && i + 2 <= stream.length) out.egr_err_pct = ((u8() - 128) * 100) / 128;
         else if (pid === '2E' && i + 2 <= stream.length) out.evap_purge_pct = (u8() * 100) / 255;
@@ -990,8 +1047,13 @@
         if (actual < g.ratio * 0.93) dist += 0.35;
         if (dist < bestDist) { bestDist = dist; best = g; }
       }
-      const slipPct = ((actual - best.ratio) / best.ratio) * 100.0;
-      return { gear: best.gear, ratio: actual, slipPct };
+      return { gear: best.gear, ratio: actual, slipPct: ((actual - best.ratio) / best.ratio) * 100.0 };
+    }
+
+    function decodeSingleDtcHex(hex4) {
+      if (!hex4 || hex4.length < 4 || hex4 === '0000') return 'Ninguno';
+      const pfx = ['P0','P1','P2','P3','C0','C1','C2','C3','B0','B1','B2','B3','U0','U1','U2','U3'];
+      return pfx[parseInt(hex4[0], 16)] + hex4.slice(1, 4);
     }
 
     function decodeDTCs(raw, modeReply) {
@@ -1003,12 +1065,10 @@
         if (count === 0) return 'Ninguno';
         hex = hex.length >= 2 + count * 4 ? hex.slice(2, 2 + count * 4) : hex.slice(2);
       }
-      const pfx = ['P0','P1','P2','P3','C0','C1','C2','C3','B0','B1','B2','B3','U0','U1','U2','U3'];
       const codes = [];
       for (let i = 0; i + 4 <= hex.length; i += 4) {
-        const chunk = hex.slice(i, i + 4);
-        if (chunk === '0000') continue;
-        codes.push(pfx[parseInt(chunk[0], 16)] + chunk.slice(1));
+        const c = decodeSingleDtcHex(hex.slice(i, i + 4));
+        if (c !== 'Ninguno') codes.push(c);
       }
       return codes.length ? [...new Set(codes)].join('|') : 'Ninguno';
     }
@@ -1026,13 +1086,99 @@
     }
 
     // =========================================================================
-    // CONEXIÓN PRINCIPAL (SIN AUTO-CONEXIÓN EN LOAD)
+    // FREEZE FRAME (MODO 02) — INSTANTÁNEA EXACTA DE CUANDO SALIÓ P0137 / FALLA
+    // =========================================================================
+    btnFreezeFrame.onclick = async () => {
+      if (!isConnected || isRecording) return;
+      btnFreezeFrame.disabled = true;
+      btnFreezeFrame.textContent = 'Leyendo...';
+      try {
+        const ffDtcRaw = await sendCmd('020200', 1800, 80);
+        const ffDtcPay = reassemblePayload(ffDtcRaw, '420200');
+        const dtc = ffDtcPay ? decodeSingleDtcHex(ffDtcPay.slice(0, 4)) : 'Sin Freeze Frame';
+
+        const ffPids = ['03','04','05','06','07','0B','0C','0D','0F','10','15'];
+        const ffData = {};
+        for (const p of ffPids) {
+          const r = await sendCmd(`02${p}00`, 1200);
+          const pay = reassemblePayload(r, `42${p}00`);
+          if (pay) Object.assign(ffData, parseMode01Payload(p + pay, p));
+        }
+
+        const lines = [
+          `<b>Freeze Frame (Modo 02) — Código disparador: ${dtc}</b>`,
+          `RPM: ${fmt(ffData.rpm, 0) || '--'} | Vel: ${fmt(ffData.spd_kmh, 0) || '--'} km/h | Carga: ${fmt(ffData.load_pct, 1) || '--'}%`,
+          `ECT: ${fmt(ffData.ect_c, 0) || '--'} °C | IAT: ${fmt(ffData.iat_c, 0) || '--'} °C | MAP: ${fmt(ffData.map_kpa, 0) || '--'} kPa | MAF: ${fmt(ffData.maf_gs, 2) || '--'} g/s`,
+          `STFT: ${fmt(ffData.stft_pct, 2) || '--'}% | LTFT: ${fmt(ffData.ltft_pct, 2) || '--'}% | O2 S2: ${fmt(ffData.o2s2_v, 3) || '--'} V | Bucle: ${ffData.fuel_sys || '--'}`
+        ];
+        el('ffBox').innerHTML = lines.join('<br>');
+        el('ffBox').style.display = 'block';
+        logDebug('Freeze Frame M02 leído: ' + dtc);
+      } catch (e) {
+        logDebug('Error Freeze Frame: ' + formatErr(e));
+      } finally {
+        btnFreezeFrame.textContent = 'Freeze M02';
+        if (isConnected && !isRecording) btnFreezeFrame.disabled = false;
+      }
+    };
+
+    // =========================================================================
+    // PROGRAMADOR DE PARES INTERCALADOS ACOPLADOS POR FÍSICA DEL R18A1
+    // =========================================================================
+    function buildInterleavedSchedule() {
+      const has = (p) => supportedPids.has(p);
+      const subCycles = [];
+      const o2Primary = has('34') ? '34' : (has('24') ? '24' : null);
+
+      const sc1 = [];
+      if (has('0C') && has('0B')) sc1.push({ tag: 'RPM+MAP', pids: ['0C', '0B'], bytes: 6 });
+      else { if (has('0C')) sc1.push({ tag: 'RPM', pids: ['0C'], bytes: 4 }); if (has('0B')) sc1.push({ tag: 'MAP', pids: ['0B'], bytes: 3 }); }
+      if (has('06') && has('0D')) sc1.push({ tag: 'STFT+SPD', pids: ['06', '0D'], bytes: 5 });
+      else { if (has('06')) sc1.push({ tag: 'STFT', pids: ['06'], bytes: 3 }); if (has('0D')) sc1.push({ tag: 'SPD', pids: ['0D'], bytes: 3 }); }
+      if (sc1.length) subCycles.push(sc1);
+
+      const sc2 = [];
+      if (has('0C') && has('10')) sc2.push({ tag: 'RPM+MAF', pids: ['0C', '10'], bytes: 7 });
+      else { if (has('0C')) sc2.push({ tag: 'RPM', pids: ['0C'], bytes: 4 }); if (has('10')) sc2.push({ tag: 'MAF', pids: ['10'], bytes: 4 }); }
+      if (o2Primary) sc2.push({ tag: 'O2_B1S1', pids: [o2Primary], bytes: 6 });
+      else if (has('0E') && has('04')) sc2.push({ tag: 'AV+LOAD', pids: ['0E', '04'], bytes: 5 });
+      if (sc2.length) subCycles.push(sc2);
+
+      const sc3 = [];
+      if (has('0B') && has('10')) sc3.push({ tag: 'MAP+MAF', pids: ['0B', '10'], bytes: 6 });
+      else { if (has('0B')) sc3.push({ tag: 'MAP', pids: ['0B'], bytes: 3 }); if (has('10')) sc3.push({ tag: 'MAF', pids: ['10'], bytes: 4 }); }
+      if (has('15')) sc3.push({ tag: 'O2_B1S2', pids: ['15'], bytes: 4 });
+      else if (has('06') && has('4C')) sc3.push({ tag: 'STFT+CVR', pids: ['06', '4C'], bytes: 5 });
+      if (sc3.length) subCycles.push(sc3);
+
+      if (!subCycles.length) subCycles.push([{ tag: 'BASE', pids: ['0C', '0D'], bytes: 6 }]);
+
+      const slowPairs = [];
+      const candidates = [
+        ['05', '0F'], ['07', '0E'], ['04', '4C'], ['2E', '2C'],
+        ['2D', '03'], ['33', '42'], ['11', '45'], ['43', '44'],
+        ['3C', '32'], ['2F', '1F'], ['46', '47']
+      ];
+      const WIDE = new Set(['34', '24', '15', '3C', '43', '44', '32', '1F', '42']);
+      for (const [a, b] of candidates) {
+        const ha = has(a), hb = has(b);
+        if (ha && hb && !WIDE.has(a) && !WIDE.has(b)) slowPairs.push({ pids: [a, b], bytes: 5 });
+        else {
+          if (ha) slowPairs.push({ pids: [a], bytes: 4 });
+          if (hb) slowPairs.push({ pids: [b], bytes: 4 });
+        }
+      }
+      return { subCycles, slowPairs };
+    }
+
+    // =========================================================================
+    // CONEXIÓN PRINCIPAL + AISLAMIENTO DE ECM + AUTO-CALIBRACIÓN CAN
     // =========================================================================
     function handleDisconnect() {
       isConnected = false; isConnecting = false; isRecording = false;
       disableWakeLock(); stopGpsWatch();
       connPill.textContent = 'DESCONECTADO'; connPill.className = 'pill';
-      btnConnect.disabled = false; btnScanAll.disabled = false; btnRecord.disabled = true;
+      btnConnect.disabled = false; btnScanAll.disabled = false; btnRecord.disabled = true; btnFreezeFrame.disabled = true;
       logDebug('Bluetooth desconectado.');
     }
 
@@ -1047,17 +1193,16 @@
         bleDevice.ongattserverdisconnected = handleDisconnect;
       }
 
-      setStatus('Conectando por Bluetooth con <b>' + (bleDevice.name || 'OBDII') + '</b>...');
+      setStatus('Conectando Bluetooth con <b>' + (bleDevice.name || 'OBDII') + '</b>...');
       const server = await bleDevice.gatt.connect();
 
-      setStatus('Detectando canal UART real del adaptador ELM327...');
+      setStatus('Detectando canal UART real del ELM327...');
       await discoverAndLockUart(server);
 
       setStatus('Inicializando chip ELM327...');
       const zResp = await sendCmd('ATZ', 2500, 350);
       const atiResp = await sendCmd('ATI', 1200, 80);
-      const rawChip = (atiResp || zResp).replace(/[\r\n>]/g, ' ').replace(/AT[ZI]/gi, '').trim();
-      ecuInfo.elmVer = rawChip.slice(0, 22) || 'ELM327 (sin ID)';
+      ecuInfo.elmVer = (atiResp || zResp).replace(/[\r\n>]/g, ' ').replace(/AT[ZI]/gi, '').trim().slice(0, 18) || 'ELM327';
 
       await sendCmd('ATE0', 1000, 80);
       await sendCmd('ATL0', 1000, 60);
@@ -1067,53 +1212,74 @@
 
       const rvResp = await sendCmd('ATRV', 1200, 60);
       ecuInfo.batV = rvResp.replace(/[\r\n>]/g, '').trim() || '--';
-      el('m_chip').textContent = `${ecuInfo.elmVer} • ${ecuInfo.batV}`;
-      logDebug(`Chip confirmado: ${ecuInfo.elmVer} | Batería: ${ecuInfo.batV}`);
 
-      setStatus('Buscando protocolo de la ECU Honda Civic...');
+      setStatus('Buscando protocolo CAN del Honda Civic...');
       await sendCmd('ATSP0', 1200, 120);
       let p00 = await sendCmd('0100', 8000, 200);
-      logDebug('0100 Auto: ' + (p00.replace(/[\r\n]+/g, ' | ').slice(0, 120) || '(vacío)'));
       let pay00 = reassemblePayload(p00, '4100');
-
-      if (!pay00) {
-        await sendCmd('ATSP7', 1200, 120);
-        p00 = await sendCmd('0100', 4500, 180);
-        logDebug('0100 SP7: ' + (p00.replace(/[\r\n]+/g, ' | ').slice(0, 120) || '(vacío)'));
-        pay00 = reassemblePayload(p00, '4100');
-      }
-      if (!pay00) {
-        await sendCmd('ATSP6', 1200, 120);
-        p00 = await sendCmd('0100', 4500, 180);
-        logDebug('0100 SP6: ' + (p00.replace(/[\r\n]+/g, ' | ').slice(0, 120) || '(vacío)'));
-        pay00 = reassemblePayload(p00, '4100');
-      }
-      if (!pay00) {
-        throw new Error(`El chip respondió (${ecuInfo.batV}), pero la ECU no contestó a 0100. Verifica que el motor esté encendido.`);
-      }
+      if (!pay00) { await sendCmd('ATSP7', 1200, 120); p00 = await sendCmd('0100', 4500, 180); pay00 = reassemblePayload(p00, '4100'); }
+      if (!pay00) { await sendCmd('ATSP6', 1200, 120); p00 = await sendCmd('0100', 4500, 180); pay00 = reassemblePayload(p00, '4100'); }
+      if (!pay00) throw new Error(`Chip OK (${ecuInfo.batV}), pero la ECU no contestó a 0100. Verifica que el motor esté encendido.`);
 
       const dpRaw = await sendCmd('ATDP', 1000, 80);
       ecuInfo.proto = dpRaw.replace(/[\r\n>]/g, '').replace('AUTO,', '').trim() || 'CAN';
       isCanProtocol = /CAN|15765/i.test(ecuInfo.proto);
 
-      supportedPids.clear();
-      parseBitmask(pay00, 0x00);
-      if (supportedPids.has('20')) parseBitmask(reassemblePayload(await sendCmd('0120', 2200, 100), '4120'), 0x20);
-      if (supportedPids.has('40')) parseBitmask(reassemblePayload(await sendCmd('0140', 2200, 100), '4140'), 0x40);
-      logDebug(`PIDs activos (${supportedPids.size}): ` + [...supportedPids].join(','));
+      // AISLAMIENTO DE ECM (evita colisión con TCM 18DAF118 / 7E9 en Civic 5AT)
+      ecmLockedId = '';
+      if (isCanProtocol) {
+        setStatus('Aislando ECU de Motor (ECM) para evitar choques con TCM...');
+        await sendCmd('ATH1', 800, 60);
+        const hdrMapRaw = await sendCmd('010B', 1600, 80);
+        let hdrs = extractCanHeaders(hdrMapRaw);
+        if (!hdrs.length) hdrs = extractCanHeaders(await sendCmd('0100', 1600, 80));
+        await sendCmd('ATH0', 800, 60);
 
-      const desiredFast = ['0C','0D','0B','10','06','07','34','15','0E','04','2E','4C','45'];
-      const desiredSlow = ['03','05','0F','3C','44','43','11','46','47','49','4A','2C','2D','32','33','2F','42','1F'];
-      fastPidList = desiredFast.filter(p => supportedPids.has(p));
-      slowPidList = desiredSlow.filter(p => supportedPids.has(p));
-      if (!fastPidList.length) fastPidList = ['0C','0B','10','06','07','05','0D'];
-
-      useMultiPid = false;
-      if (isCanProtocol && fastPidList.length >= 2) {
-        const testRaw = await sendCmd('010C0B', 1800, 100);
-        const tp = parseMode01Payload(reassemblePayload(testRaw, '41'));
-        if (tp.rpm !== undefined && tp.map_kpa !== undefined) useMultiPid = true;
+        if (hdrs.length > 0) {
+          const targetEcm = hdrs.find(h => h === '18DAF110' || h === '7E8') || hdrs[0];
+          logDebug(`ECUs CAN vistas: ${hdrs.join(', ')} -> Probando filtro ECM: ${targetEcm}`);
+          await sendCmd('ATCRA' + targetEcm, 900, 60);
+          const verifyC = parseMode01Payload(reassemblePayload(await sendCmd('010C', 1300, 60), '41'), '0C');
+          const verifyB = parseMode01Payload(reassemblePayload(await sendCmd('010B', 1300, 60), '41'), '0B');
+          if (verifyC.rpm !== undefined && verifyB.map_kpa !== undefined) {
+            ecmLockedId = targetEcm;
+            logDebug(`✓ Filtro ECM bloqueado en ${ecmLockedId} (RPM:${verifyC.rpm} MAP:${verifyB.map_kpa})`);
+          } else {
+            await sendCmd('ATAR', 900, 60);
+            logDebug('Filtro ATCRA revertido a modo estándar.');
+          }
+        }
       }
+      el('m_chip').textContent = `${ecuInfo.elmVer} • ${ecuInfo.batV} • ${ecmLockedId || 'All'}`;
+
+      // Lectura limpia de bitmasks de PIDs soportados (aislado en ECM)
+      supportedPids.clear();
+      const raw00 = await sendCmd('0100', 2200, 100);
+      parseBitmaskFromRaw(raw00, '4100', 0x00);
+      if (supportedPids.has('20')) parseBitmaskFromRaw(await sendCmd('0120', 2200, 100), '4120', 0x20);
+      if (supportedPids.has('40')) parseBitmaskFromRaw(await sendCmd('0140', 2200, 100), '4140', 0x40);
+      logDebug(`PIDs ECM activos (${supportedPids.size}): ` + [...supportedPids].join(','));
+
+      // Auto-calibración del sufijo '1' CAN y de pares 6B vs 7B
+      canRespSuffix = '';
+      if (isCanProtocol) {
+        const testSuf = parseMode01Payload(reassemblePayload(await sendCmd('010C1', 1200, 60), '41'), '0C');
+        if (testSuf.rpm !== undefined) canRespSuffix = '1';
+      }
+      multiPidSupport = { pair6: false, pair7: false };
+      if (isCanProtocol && supportedPids.has('0C') && supportedPids.has('0B')) {
+        const t6 = parseMode01Payload(reassemblePayload(await sendCmd('010C0B' + canRespSuffix, 1400, 60), '41'));
+        if (t6.rpm !== undefined && t6.map_kpa !== undefined) multiPidSupport.pair6 = true;
+      }
+      if (isCanProtocol && supportedPids.has('0C') && supportedPids.has('10')) {
+        const t7 = parseMode01Payload(reassemblePayload(await sendCmd('010C10' + canRespSuffix, 1400, 60), '41'));
+        if (t7.rpm !== undefined && t7.maf_gs !== undefined) multiPidSupport.pair7 = true;
+      }
+      logDebug(`Calibración CAN: sufijo="${canRespSuffix || 'ninguno'}" | Par6B:${multiPidSupport.pair6} | Par7B:${multiPidSupport.pair7}`);
+
+      const sched = buildInterleavedSchedule();
+      fastSubCycles = sched.subCycles;
+      slowBatches = sched.slowPairs;
 
       if (supportedPids.has('01')) parseMode01Payload(reassemblePayload(await sendCmd('0101', 1500, 80), '41'), '01');
       if (supportedPids.has('30')) parseMode01Payload(reassemblePayload(await sendCmd('0130', 1500, 80), '41'), '30');
@@ -1124,47 +1290,37 @@
       ecuInfo.dtcPending = decodeDTCs(await sendCmd('07', 2000, 100), '47');
       ecuInfo.vin = decodeVIN(await sendCmd('0902', 2500, 150));
 
-      el('m_proto').textContent = `${ecuInfo.proto.slice(0, 18)} (${useMultiPid ? 'Multi' : '1x1'} • ${supportedPids.size} PIDs)`;
+      const modeTag = multiPidSupport.pair7 ? '2-PID Full' : (multiPidSupport.pair6 ? '2-PID 6B' : '1x1 Seguro');
+      el('m_proto').textContent = `${ecuInfo.proto.slice(0, 15)} (${modeTag} • ${supportedPids.size})`;
       el('m_vin').textContent = ecuInfo.vin;
       el('m_dtc').textContent = `${ecuInfo.dtcStored} (MIL: ${ecuInfo.milOn})`;
       el('m_pdtc').textContent = ecuInfo.dtcPending;
       el('m_readiness').textContent = ecuInfo.readiness;
 
       isConnected = true;
-      connPill.textContent = 'CONECTADO';
-      connPill.className = 'pill ok';
-      btnConnect.disabled = true;
-      btnScanAll.disabled = true;
-      btnRecord.disabled = false;
-      btnDisconnectSave.disabled = false;
-      setStatus(`<b>¡OBDII Conectado!</b> (${ecuInfo.batV} • ${supportedPids.size} PIDs). Pulsa <b>2. Iniciar Grabación</b>.`);
+      connPill.textContent = 'CONECTADO'; connPill.className = 'pill ok';
+      btnConnect.disabled = true; btnScanAll.disabled = true;
+      btnRecord.disabled = false; btnDisconnectSave.disabled = false; btnFreezeFrame.disabled = false;
+      setStatus(`<b>¡Civic 2008 Conectado!</b> (${modeTag}, ${supportedPids.size} PIDs). Puedes leer <b>Freeze M02</b> o pulsar <b>2. Iniciar Grabación</b>.`);
     }
 
     async function connectFlow(useFilters = true) {
       if (isConnecting || isConnected) return;
-      isConnecting = true;
-      btnConnect.disabled = true;
-      btnScanAll.disabled = true;
+      isConnecting = true; btnConnect.disabled = true; btnScanAll.disabled = true;
       try {
-        if (!hasWebBluetooth()) {
-          throw new Error('Web Bluetooth no disponible aquí. Abre en Safari (pestaña normal con beacio activo) o Chrome en PC/Android.');
-        }
+        if (!hasWebBluetooth()) throw new Error('Web Bluetooth no detectado. Usa Safari (pestaña normal con beacio) o Chrome.');
         setStatus('Selecciona <b>OBDII</b> en la ventana de Bluetooth...');
         const options = useFilters
           ? { filters: OBD_FILTERS, optionalServices: BLE_SERVICES }
           : { acceptAllDevices: true, optionalServices: BLE_SERVICES };
-        const chosen = await navigator.bluetooth.requestDevice(options);
-        await setupConnectedDevice(chosen);
+        await setupConnectedDevice(await navigator.bluetooth.requestDevice(options));
       } catch (err) {
         const msg = formatErr(err);
         logDebug('Aviso conexión: ' + msg);
         setStatus(`<b>No conectado:</b> ${msg}`);
       } finally {
         isConnecting = false;
-        if (!isConnected) {
-          btnConnect.disabled = false;
-          btnScanAll.disabled = false;
-        }
+        if (!isConnected) { btnConnect.disabled = false; btnScanAll.disabled = false; }
       }
     }
 
@@ -1172,26 +1328,19 @@
     btnScanAll.onclick = () => connectFlow(false);
 
     // =========================================================================
-    // MOTOR DE MUESTREO DUAL + CÁLCULOS DE INGENIERÍA
+    // MOTOR DE MUESTREO INTERCALADO + FÍSICA R18A1 (i-VTEC ECO, DFCO, VIAJE)
     // =========================================================================
-    function chunkList(arr, size) {
-      const res = [];
-      for (let i = 0; i < arr.length; i += size) res.push(arr.slice(i, i + size));
-      return res;
-    }
-
-    async function pollPidList(pidArray) {
+    async function queryPidItem(item) {
+      const pids = item.pids;
       const merged = {};
-      if (useMultiPid) {
-        for (const batch of chunkList(pidArray, 5)) {
-          if (!isRecording) break;
-          const raw = await sendCmd('01' + batch.join(''), 1300);
-          Object.assign(merged, parseMode01Payload(reassemblePayload(raw, '41')));
-        }
+      const canBatch = pids.length > 1 && ((item.bytes <= 6 && multiPidSupport.pair6) || (item.bytes === 7 && multiPidSupport.pair7));
+      if (canBatch) {
+        const raw = await sendCmd('01' + pids.join('') + canRespSuffix, 950);
+        Object.assign(merged, parseMode01Payload(reassemblePayload(raw, '41')));
       } else {
-        for (const pid of pidArray) {
+        for (const pid of pids) {
           if (!isRecording) break;
-          const raw = await sendCmd('01' + pid, 1000);
+          const raw = await sendCmd('01' + pid + canRespSuffix, 850);
           Object.assign(merged, parseMode01Payload(reassemblePayload(raw, '41'), pid));
         }
       }
@@ -1203,57 +1352,107 @@
     }
 
     async function recordingLoop() {
-      const t0 = performance.now();
-      let cycle = 0;
-      prevSpdKmh = null;
-      prevTimeSec = null;
+      const t0Wall = Date.now();
+      let stepIdx = 0, slowIdx = 0;
+      prevSpdKmh = null; prevTimeSec = null; lastWallMs = Date.now();
+
+      for (const batch of slowBatches) {
+        if (!isRecording) break;
+        Object.assign(live, await queryPidItem(batch));
+      }
 
       while (isRecording && isConnected) {
-        if (cycle % 5 === 0) {
-          Object.assign(live, await pollPidList(slowPidList));
+        if (slowBatches.length > 0) {
+          Object.assign(live, await queryPidItem(slowBatches[slowIdx % slowBatches.length]));
+          slowIdx++;
         }
-        Object.assign(live, await pollPidList(fastPidList));
+
+        const sc = fastSubCycles[stepIdx % fastSubCycles.length];
+        const tags = [];
+        for (const item of sc) {
+          if (!isRecording) break;
+          Object.assign(live, await queryPidItem(item));
+          tags.push(item.tag);
+        }
         if (!isRecording) break;
 
-        const elapsedSec = (performance.now() - t0) / 1000;
-        const isoTime = new Date().toISOString();
+        const nowMs = Date.now();
+        const dtWallSec = Math.max(0, (nowMs - lastWallMs) / 1000);
+        lastWallMs = nowMs;
 
-        const rpm = Number(live.rpm);
-        const map = Number(live.map_kpa);
-        const baro = Number(live.baro_kpa) || 100.0;
-        const maf = Number(live.maf_gs);
-        const iat = Number(live.iat_c);
-        const spd = live.spd_kmh !== '' ? Number(live.spd_kmh) : 0;
-        const stft = live.stft_pct !== '' ? Number(live.stft_pct) : NaN;
-        const ltft = live.ltft_pct !== '' ? Number(live.ltft_pct) : NaN;
+        let rowEvent = pendingEventTag;
+        pendingEventTag = '';
+        const isGap = dtWallSec > 5.0;
+        if (isGap) rowEvent = (rowEvent ? rowEvent + '|' : '') + `Pausa_iOS_${dtWallSec.toFixed(0)}s`;
+
+        live.par_activo = tags.join('+');
+        const elapsedSec = (nowMs - t0Wall) / 1000;
+        const isoTime = new Date(nowMs).toISOString();
+
+        const rpm = numOrNaN(live.rpm);
+        const map = numOrNaN(live.map_kpa);
+        const baro = !Number.isNaN(numOrNaN(live.baro_kpa)) ? Number(live.baro_kpa) : 100.0;
+        const maf = numOrNaN(live.maf_gs);
+        const iat = numOrNaN(live.iat_c);
+        const ect = numOrNaN(live.ect_c);
+        const spd = !Number.isNaN(numOrNaN(live.spd_kmh)) ? Number(live.spd_kmh) : 0;
+        const stft = numOrNaN(live.stft_pct);
+        const ltft = numOrNaN(live.ltft_pct);
         const trimTotal = (!Number.isNaN(stft) && !Number.isNaN(ltft)) ? (stft + ltft) : NaN;
         const vacInHg = (!Number.isNaN(map) && map > 0) ? (baro - map) * 0.2953 : NaN;
 
         let vePct = NaN;
-        if (rpm > 100 && map > 0 && maf > 0 && !Number.isNaN(iat)) {
+        if (!Number.isNaN(rpm) && rpm > 100 && !Number.isNaN(map) && map > 0 && !Number.isNaN(maf) && maf > 0 && !Number.isNaN(iat)) {
           const maf100 = (rpm / 120.0) * R18_DISPLACEMENT_L * (map / (0.28705 * (iat + 273.15)));
           if (maf100 > 0) vePct = (maf / maf100) * 100.0;
         }
 
-        const extTempVal = live.amb_obd_c !== '' ? Number(live.amb_obd_c) : (envState.extTempC !== '' ? Number(envState.extTempC) : NaN);
+        const extTempVal = !Number.isNaN(numOrNaN(live.amb_obd_c)) ? Number(live.amb_obd_c) : numOrNaN(envState.extTempC);
         const deltaIatExt = (!Number.isNaN(iat) && !Number.isNaN(extTempVal)) ? (iat - extTempVal) : NaN;
 
         const trans = estimateHonda5AT(rpm, spd);
         let acelMs2 = NaN;
-        if (prevSpdKmh !== null && prevTimeSec !== null && (elapsedSec - prevTimeSec) > 0.05) {
+        if (!isGap && prevSpdKmh !== null && prevTimeSec !== null && (elapsedSec - prevTimeSec) > 0.05) {
           acelMs2 = ((spd - prevSpdKmh) / 3.6) / (elapsedSec - prevTimeSec);
         }
-        prevSpdKmh = spd;
-        prevTimeSec = elapsedSec;
+        prevSpdKmh = spd; prevTimeSec = elapsedSec;
 
-        const gpsSpd = gpsState.speedKmh !== '' ? Number(gpsState.speedKmh) : NaN;
+        const gpsSpd = numOrNaN(gpsState.speedKmh);
         const diffVelPct = (!Number.isNaN(gpsSpd) && gpsSpd >= 10 && spd >= 10) ? ((spd - gpsSpd) / gpsSpd) * 100 : NaN;
 
-        const afrRef = (live.cmd_afr && Number(live.cmd_afr) > 10) ? Number(live.cmd_afr) : 14.7;
-        const fuelLh = (maf > 0) ? ((maf / afrRef) / 735.0) * 3600.0 : NaN;
-        const fuelKml = (spd > 1 && fuelLh > 0.05) ? (spd / fuelLh) : 0;
+        const tpsRel = numOrNaN(live.tps_rel_pct);
+        const o2Lam = numOrNaN(live.o2s1_lambda);
+        const loadVal = numOrNaN(live.load_pct);
+        const isDfco = (spd >= 15 && rpm >= 1150 && !Number.isNaN(tpsRel) && tpsRel <= 2.8 &&
+          ((!Number.isNaN(o2Lam) && o2Lam >= 1.65) || (!Number.isNaN(loadVal) && loadVal <= 17 && !Number.isNaN(maf) && maf <= 3.5)));
 
-        el('m_loop').textContent = live.fuel_sys || '--';
+        const isIvtecEco = (!isDfco && !Number.isNaN(ect) && ect >= 65 && !Number.isNaN(rpm) && rpm >= 1100 && rpm <= 3500 &&
+          spd >= 25 && !Number.isNaN(map) && map >= 55 && !Number.isNaN(vePct) && vePct <= 64 &&
+          !Number.isNaN(tpsRel) && tpsRel >= 4 && tpsRel <= 32);
+
+        const o2Afr = numOrNaN(live.o2s1_afr);
+        const cmdAfrVal = numOrNaN(live.cmd_afr);
+        const afrRef = (!Number.isNaN(o2Afr) && o2Afr >= 10.5 && o2Afr <= 19.0) ? o2Afr
+          : ((!Number.isNaN(cmdAfrVal) && cmdAfrVal >= 10.5 && cmdAfrVal <= 16.5) ? cmdAfrVal : 14.7);
+        const fuelLh = isDfco ? 0.0 : ((!Number.isNaN(maf) && maf > 0) ? ((maf / afrRef) / 740.0) * 3600.0 : NaN);
+        const fuelKml = isDfco ? 99.9 : ((!Number.isNaN(fuelLh) && fuelLh > 0.05 && spd > 1) ? (spd / fuelLh) : (spd <= 1 ? 0 : NaN));
+
+        if (!isGap && dtWallSec > 0 && dtWallSec <= 5.0) {
+          trip.distKm += (spd * dtWallSec) / 3600.0;
+          if (!Number.isNaN(fuelLh)) trip.fuelL += (fuelLh * dtWallSec) / 3600.0;
+          if (spd < 2) trip.idleSec += dtWallSec;
+          if (acState === 'Con_AC') trip.acSec += dtWallSec;
+          if (isIvtecEco) trip.ecoSec += dtWallSec;
+          if (isDfco) trip.dfcoSec += dtWallSec;
+        }
+        const tripAvgKml = trip.fuelL > 0.005 ? (trip.distKm / trip.fuelL) : NaN;
+
+        el('t_dist').textContent = `${trip.distKm.toFixed(2)} km`;
+        el('t_fuel').textContent = `${trip.fuelL.toFixed(3)} L`;
+        el('t_kml').textContent = !Number.isNaN(tripAvgKml) ? `${tripAvgKml.toFixed(1)} km/L` : '-- km/L';
+        el('t_mode').textContent = isDfco ? 'DFCO (0 L/h)' : (isIvtecEco ? 'i-VTEC ECO' : 'Normal');
+
+        el('m_loop').textContent = `${live.fuel_sys || '--'} [${live.par_activo}]`;
         el('v_rpm').textContent = fmt(rpm, 0) || '--';
         el('v_spd').textContent = fmt(spd, 0) || '0';
         el('v_gps_spd').textContent = fmt(gpsSpd, 0) || '--';
@@ -1276,12 +1475,12 @@
         el('v_o2s2').textContent = fmt(live.o2s2_v, 3) || '--';
         el('v_o2s2t').textContent = fmt(live.o2s2_stft_pct, 1) || '--';
         el('v_cat').textContent = fmt(live.cat_temp_c, 0) || '--';
-        el('v_ect').textContent = fmt(live.ect_c, 0) || '--';
+        el('v_ect').textContent = fmt(ect, 0) || '--';
         el('v_iat').textContent = fmt(iat, 0) || '--';
         el('v_delta_iat').textContent = fmt(deltaIatExt, 1) || '--';
         el('v_ecu').textContent = fmt(live.ecu_v, 2) || '--';
         el('v_lh').textContent = fmt(fuelLh, 2) || '--';
-        el('v_kml').textContent = spd > 1 ? fmt(fuelKml, 1) : '0.0';
+        el('v_kml').textContent = isDfco ? '∞ (DFCO)' : (spd > 1 ? (fmt(fuelKml, 1) || '--') : '0.0');
         el('v_slope').textContent = fmt(gpsState.slopePct, 1) || '--';
         el('v_fuel').textContent = fmt(live.fuel_level_pct, 1) || '--';
         el('v_evap').textContent = fmt(live.evap_purge_pct, 1) || '--';
@@ -1292,29 +1491,40 @@
         el('v_rtps').textContent = fmt(live.tps_rel_pct, 1) || '--';
 
         const alerts = [];
+        el('card_map').className = 'card' + (isIvtecEco ? ' eco' : '');
+        el('card_maf').className = 'card' + (isIvtecEco ? ' eco' : '');
         el('card_trim').className = 'card' + (Math.abs(trimTotal) >= 12 ? ' danger' : Math.abs(trimTotal) >= 8 ? ' warn' : '');
         if (!Number.isNaN(trimTotal) && Math.abs(trimTotal) >= 10) alerts.push(`Trim ${trimTotal > 0 ? 'POBRE' : 'RICO'} (${trimTotal.toFixed(1)}%)`);
-        const o2s2v = Number(live.o2s2_v);
-        el('card_o2s2').className = 'card' + (!Number.isNaN(o2s2v) && o2s2v < 0.15 && Number(live.ect_c) >= 80 ? ' warn' : '');
-        if (!Number.isNaN(o2s2v) && o2s2v < 0.15 && Number(live.ect_c) >= 80) alerts.push(`O2 S2 bajo (${o2s2v.toFixed(3)}V)`);
+
+        const o2s2v = numOrNaN(live.o2s2_v);
+        el('card_o2s2').className = 'card' + (!Number.isNaN(o2s2v) && o2s2v < 0.15 && !Number.isNaN(ect) && ect >= 78 ? ' warn' : '');
+        if (!Number.isNaN(o2s2v) && o2s2v < 0.15 && !Number.isNaN(ect) && ect >= 78) alerts.push(`O2 S2 bajo (${o2s2v.toFixed(3)}V — P0137/P2270)`);
+
+        const rtSec = numOrNaN(live.runtime_s);
+        const coldThermostat = (!Number.isNaN(rtSec) && rtSec >= 480 && !Number.isNaN(ect) && ect < 78);
+        el('card_ect').className = 'card' + (ect >= 103 ? ' danger' : coldThermostat ? ' warn' : '');
+        if (ect >= 103) alerts.push(`ECT ALTA (${ect}°C)`);
+        else if (coldThermostat) alerts.push(`Motor frío tras ${(rtSec/60).toFixed(0)} min (${ect}°C — revisar termostato)`);
+
         const highSlip = (trans.gear === '4a' || trans.gear === '5a') && spd >= 65 && Number(trans.slipPct) > 12;
         el('card_trans').className = 'card' + (highSlip ? ' warn' : '');
         if (highSlip) alerts.push(`Convertidor sin Lock-up en ${trans.gear} (${Number(trans.slipPct).toFixed(1)}%)`);
 
-        if (alerts.length) {
-          alertStrip.style.display = 'block';
-          alertStrip.textContent = 'Alerta: ' + alerts.join(' • ');
-        } else {
-          alertStrip.style.display = 'none';
-        }
+        if (alerts.length) { alertStrip.style.display = 'block'; alertStrip.textContent = 'Alerta: ' + alerts.join(' • '); }
+        else { alertStrip.style.display = 'none'; }
 
         if (!Number.isNaN(rpm)) {
           const noteClean = (el('sessionNote').value || '').trim();
           records.push({
             timestamp_iso: isoTime,
             tiempo_seg: elapsedSec.toFixed(2),
+            dt_seg: dtWallSec.toFixed(2),
+            par_intercalado: live.par_activo,
+            evento_marca: rowEvent,
             ac_estado: acState,
             modo_manejo: driveMode,
+            ivtec_eco_est: isIvtecEco ? 'SI' : 'NO',
+            dfco_activo: isDfco ? 'SI' : 'NO',
             nota_sesion: noteClean,
             bucle_combustible: live.fuel_sys,
             rpm: fmt(rpm, 0),
@@ -1329,7 +1539,7 @@
             pendiente_calle_pct: fmt(gpsState.slopePct, 1),
             temp_ext_c: fmt(extTempVal, 1),
             humedad_ext_pct: fmt(envState.extHumPct, 0),
-            fuente_clima: live.amb_obd_c !== '' ? 'OBD_0146' : envState.source,
+            fuente_clima: !Number.isNaN(numOrNaN(live.amb_obd_c)) ? 'OBD_0146' : envState.source,
             delta_iat_ext_c: fmt(deltaIatExt, 1),
             map_kpa: fmt(map, 0),
             vacio_inhg: fmt(vacInHg, 2),
@@ -1348,7 +1558,7 @@
             avance_encendido_deg: fmt(live.ign_deg, 1),
             carga_calculada_pct: fmt(live.load_pct, 1),
             carga_absoluta_pct: fmt(live.abs_load_pct, 1),
-            ect_c: fmt(live.ect_c, 0),
+            ect_c: fmt(ect, 0),
             iat_c: fmt(iat, 0),
             catalizador_c: fmt(live.cat_temp_c, 1),
             evap_purga_pct: fmt(live.evap_purge_pct, 1),
@@ -1363,6 +1573,8 @@
             pedal_e_pct: fmt(live.pedal_e_pct, 2),
             consumo_est_lh: fmt(fuelLh, 3),
             rendimiento_est_kml: fmt(fuelKml, 2),
+            viaje_dist_km: trip.distKm.toFixed(3),
+            viaje_comb_l: trip.fuelL.toFixed(4),
             nivel_tanque_pct: fmt(live.fuel_level_pct, 2),
             voltaje_ecu_v: fmt(live.ecu_v, 3),
             tiempo_motor_s: fmt(live.runtime_s, 0),
@@ -1375,27 +1587,28 @@
 
           const hz = (records.length / Math.max(0.5, elapsedSec)).toFixed(1);
           btnDisconnectSave.textContent = `3. Desconectar y Guardar (${records.length})`;
-          setStatus(`<b>Grabando:</b> ${records.length} filas • ${elapsedSec.toFixed(0)}s (${hz} Hz) • <b>${acState}</b> / <b>${driveMode}</b>`);
+          setStatus(`<b>Grabando:</b> ${records.length} filas • ${elapsedSec.toFixed(0)}s (${hz} Hz) • <b>${live.par_activo}</b>`);
 
-          if (records.length % 10 === 0) {
-            try { localStorage.setItem(BACKUP_KEY, JSON.stringify(records)); } catch (e) {}
-          }
+          if (records.length % 5 === 0) saveBackupNow();
         }
-        cycle++;
+        stepIdx++;
       }
     }
 
     btnRecord.onclick = async () => {
       isRecording = !isRecording;
       if (isRecording) {
-        await enableWakeLock();
+        enableWakeLock();
         startGpsWatch();
+        btnFreezeFrame.disabled = true;
         connPill.textContent = 'GRABANDO'; connPill.className = 'pill rec';
         btnRecord.textContent = 'Pausar Grabación'; btnRecord.style.background = '#d97706';
         recordingLoop();
       } else {
         await disableWakeLock();
         stopGpsWatch();
+        saveBackupNow();
+        if (isConnected) btnFreezeFrame.disabled = false;
         connPill.textContent = 'PAUSADO'; connPill.className = 'pill ok';
         btnRecord.textContent = 'Reanudar Grabación'; btnRecord.style.background = '#10b981';
         setStatus(`<b>Pausado:</b> ${records.length} filas acumuladas.`);
@@ -1417,22 +1630,18 @@
       const blob = new Blob([lastCsvText], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = lastCsvName || 'civic_2008_pro.csv';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      a.href = url; a.download = lastCsvName || 'civic_2008_pro.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 3000);
     };
 
     btnClearCsv.onclick = () => {
-      records = [];
-      lastCsvText = '';
-      lastCsvName = '';
-      el('csvOutputArea').value = '';
-      el('csvBox').style.display = 'none';
-      btnShareLast.disabled = true;
-      btnCopyLast.disabled = true;
+      records = []; lastCsvText = ''; lastCsvName = '';
+      trip.distKm = 0; trip.fuelL = 0; trip.idleSec = 0; trip.acSec = 0; trip.ecoSec = 0; trip.dfcoSec = 0;
+      el('t_dist').textContent = '0.00 km'; el('t_fuel').textContent = '0.000 L';
+      el('t_kml').textContent = '-- km/L'; el('t_mode').textContent = 'Normal';
+      el('csvOutputArea').value = ''; el('csvBox').style.display = 'none';
+      btnShareLast.disabled = true; btnCopyLast.disabled = true;
       btnShareLast.textContent = 'Compartir';
       btnDisconnectSave.textContent = '3. Desconectar y Guardar (0)';
       try { localStorage.removeItem(BACKUP_KEY); } catch (e) {}
@@ -1443,11 +1652,10 @@
       if (!lastCsvText) return;
       try {
         await navigator.clipboard.writeText(lastCsvText);
-        setStatus('<b>¡CSV copiado al portapapeles!</b> Pégalo directo aquí en el chat o en una nota.');
+        setStatus('<b>¡CSV copiado al portapapeles!</b> Pégalo aquí en el chat o en una nota.');
       } catch (e) {
-        el('csvOutputArea').focus();
-        el('csvOutputArea').select();
-        setStatus('Selecciona el texto de la caja verde de arriba y toca <b>Copiar</b>.');
+        el('csvOutputArea').focus(); el('csvOutputArea').select();
+        setStatus('Selecciona el texto de la caja verde y toca <b>Copiar</b>.');
       }
     };
 
@@ -1461,10 +1669,7 @@
         }
       } catch (e) {}
       if (navigator.share) {
-        try {
-          await navigator.share({ title: lastCsvName, text: lastCsvText });
-          return;
-        } catch (e) {}
+        try { await navigator.share({ title: lastCsvName, text: lastCsvText }); return; } catch (e) {}
       }
       setStatus('Usa <b>Descargar .CSV</b> o <b>Copiar CSV</b>.');
     };
@@ -1473,25 +1678,23 @@
       isRecording = false;
       await disableWakeLock();
       stopGpsWatch();
-      btnRecord.disabled = true;
-      btnDisconnectSave.disabled = true;
+      btnRecord.disabled = true; btnDisconnectSave.disabled = true; btnFreezeFrame.disabled = true;
 
       if (records.length > 0) {
-        try { localStorage.setItem(BACKUP_KEY, JSON.stringify(records)); } catch (e) {}
+        saveBackupNow();
         const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-        showCsvReady(buildCSV(records), `civic_2008_pro_${stamp}.csv`, records.length);
+        showCsvReady(buildCSV(records), `civic_2008_v5_${stamp}.csv`, records.length);
       }
 
       try { if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); } catch (e) {}
 
       isConnected = false;
       connPill.textContent = 'DESCONECTADO'; connPill.className = 'pill';
-      btnConnect.disabled = false;
-      btnScanAll.disabled = false;
+      btnConnect.disabled = false; btnScanAll.disabled = false;
       btnRecord.textContent = '2. Iniciar Grabación'; btnRecord.style.background = '#10b981';
 
       setStatus(records.length > 0
-        ? `<b>Desconectado (${records.length} filas listas).</b> Usa <b>Descargar .CSV</b>, <b>Compartir</b> o <b>Copiar CSV</b>.`
+        ? `<b>Desconectado (${records.length} filas • ${trip.distKm.toFixed(2)} km • ${trip.fuelL.toFixed(3)} L).</b> Usa <b>Descargar .CSV</b> o <b>Compartir</b>.`
         : '<b>Desconectado.</b> Sin filas grabadas en esta sesión.');
     };
   </script>
